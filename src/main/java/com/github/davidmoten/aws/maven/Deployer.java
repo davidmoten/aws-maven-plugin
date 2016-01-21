@@ -12,35 +12,36 @@ import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClient;
+import com.amazonaws.services.elasticbeanstalk.model.UpdateApplicationVersionRequest;
 import com.amazonaws.services.s3.AmazonS3Client;
 
 public final class Deployer {
 
-	private static final String DATETIME_PATTERN = "yyyyMMddHHmmss";
+	private static final String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
 
 	public void deploy(File artifact, String accessKey, String secretKey, String region, String applicationName) {
-		
+
 		final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
-	            new BasicAWSCredentials(accessKey, secretKey));
-		
+				new BasicAWSCredentials(accessKey, secretKey));
+
 		AmazonS3Client s3 = new AmazonS3Client(credentials, new ClientConfiguration());
 		Region r = Region.getRegion(Regions.fromName(region));
-        s3.setRegion(r);
-        String bucketName = "com.github.davidmoten.aws.maven";
-		if (!s3.doesBucketExist(bucketName)) {
-			s3.createBucket(bucketName);
-		} 
+		s3.setRegion(r);
+		AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials);
+		eb.setRegion(r);
+		String bucketName = eb.createStorageLocation().getS3Bucket();
 		String dateTime = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
 		String objectName = "artifact." + dateTime;
-		s3.putObject(bucketName,objectName,artifact);
+		s3.putObject(bucketName, objectName, artifact);
 
-		AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient();
-		//list buckets owned by user
-		//if one bucket starts with com.github.davidmoten.aws.maven then use that
-		//else create a new one ending with 12 chars from UUID
-		//S3 Object name will be artifact filename plus date time (yyyMMddhhmmss)
-		//upload artifact to S3 object in bucket
-		//call update-application-version with S3 object address
+		UpdateApplicationVersionRequest request = new UpdateApplicationVersionRequest();
+		request.setApplicationName(applicationName);
+		request.setVersionLabel(bucketName);
+		eb.updateApplicationVersion(request);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(DATETIME_PATTERN)));
 	}
 
 }
