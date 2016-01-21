@@ -24,22 +24,21 @@ public final class Deployer {
 		final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
 				new BasicAWSCredentials(accessKey, secretKey));
 
-		AmazonS3Client s3 = new AmazonS3Client(credentials, new ClientConfiguration());
 		Region r = Region.getRegion(Regions.fromName(region));
-		s3.setRegion(r);
-		AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials);
-		eb.setRegion(r);
+		
+		AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials).withRegion(r);
 		String bucketName = eb.createStorageLocation().getS3Bucket();
 		String dateTime = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
+		
+		AmazonS3Client s3 = new AmazonS3Client(credentials, new ClientConfiguration()).withRegion(r);
 		String objectName = "artifact." + dateTime;
 		s3.putObject(bucketName, objectName, artifact);
 
-		UpdateApplicationVersionRequest request = new UpdateApplicationVersionRequest();
-		request.setApplicationName(applicationName);
-		request.setVersionLabel(bucketName);
+		UpdateApplicationVersionRequest request = new UpdateApplicationVersionRequest()
+				.withApplicationName(applicationName).withVersionLabel(bucketName);
 		eb.updateApplicationVersion(request);
 	}
-	
+
 	public static void main(String[] args) {
 		System.out.println(Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(DATETIME_PATTERN)));
 	}
