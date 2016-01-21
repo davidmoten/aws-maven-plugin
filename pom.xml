@@ -8,7 +8,7 @@
 
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <aws.sdk.version>1.10.47</aws.sdk.version>
+        <aws.sdk.version>1.10.48</aws.sdk.version>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         
     </properties>
@@ -17,6 +17,11 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-elasticbeanstalk</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
         <dependency>
