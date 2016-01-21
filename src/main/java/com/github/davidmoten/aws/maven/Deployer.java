@@ -24,7 +24,7 @@ public final class Deployer {
 		final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
 				new BasicAWSCredentials(accessKey, secretKey));
 
-		Region r = Region.getRegion(Regions.fromName(region));
+		final Region r = Region.getRegion(Regions.fromName(region));
 		
 		AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials).withRegion(r);
 		String bucketName = eb.createStorageLocation().getS3Bucket();
