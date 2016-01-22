@@ -18,18 +18,17 @@ import com.amazonaws.services.elasticbeanstalk.model.CreateApplicationVersionReq
 import com.amazonaws.services.elasticbeanstalk.model.S3Location;
 import com.amazonaws.services.elasticbeanstalk.model.UpdateEnvironmentRequest;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.github.davidmoten.aws.maven.DeployMojo.Proxy;
 
-public final class Deployer {
+final class Deployer {
 
     private static final String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
     private final Log log;
 
-    public Deployer(Log log) {
+    Deployer(Log log) {
         this.log = log;
     }
 
-    public void deploy(File artifact, String accessKey, String secretKey, String region,
+    void deploy(File artifact, String accessKey, String secretKey, String region,
             String applicationName, String environmentName, String versionLabel, Proxy proxy) {
 
         final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
@@ -101,11 +100,6 @@ public final class Deployer {
             }
         }
         return cc;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Instant.now().atZone(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ofPattern(DATETIME_PATTERN)));
     }
 
 }

@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 @Mojo(name = "deploy")
-public class DeployMojo extends AbstractMojo {
+public final class DeployMojo extends AbstractMojo {
 
     @Parameter(property = "awsAccessKey")
     private String awsAccessKey;
@@ -47,20 +47,6 @@ public class DeployMojo extends AbstractMojo {
     @Parameter(property = "versionLabel")
     private String versionLabel;
 
-    static class Proxy {
-        final String host;
-        final int port;
-        final String username;
-        final String password;
-
-        Proxy(String host, int port, String username, String password) {
-            this.host = host;
-            this.port = port;
-            this.username = username;
-            this.password = password;
-        }
-    }
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -68,16 +54,20 @@ public class DeployMojo extends AbstractMojo {
                 httpsProxyPassword);
 
         if (versionLabel == null) {
-            // construct version label using application name and dateTime
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String dateTime = sdf.format(new Date());
-            versionLabel = applicationName + "_" + dateTime;
+            versionLabel = createVersionLabel(applicationName, new Date());
         }
 
         Deployer deployer = new Deployer(getLog());
         deployer.deploy(artifact, awsAccessKey, awsSecretAccessKey, region, applicationName,
                 environmentName, versionLabel, proxy);
+    }
+
+    private static String createVersionLabel(String applicationName, Date date) {
+        // construct version label using application name and dateTime
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String dateTime = sdf.format(date);
+        return applicationName + "_" + dateTime;
     }
 
 }
