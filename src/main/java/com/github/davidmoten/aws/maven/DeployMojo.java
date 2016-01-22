@@ -1,6 +1,9 @@
 package com.github.davidmoten.aws.maven;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,6 +44,9 @@ public class DeployMojo extends AbstractMojo {
     @Parameter(property = "httpsProxyPassword")
     private String httpsProxyPassword;
 
+    @Parameter(property = "versionLabel")
+    private String versionLabel;
+
     static class Proxy {
         final String host;
         final int port;
@@ -57,10 +63,21 @@ public class DeployMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+
         Proxy proxy = new Proxy(httpsProxyHost, httpsProxyPort, httpsProxyUsername,
                 httpsProxyPassword);
-        new Deployer(getLog()).deploy(artifact, awsAccessKey, awsSecretAccessKey, region,
-                applicationName, environmentName, proxy);
+
+        if (versionLabel == null) {
+            // construct version label using application name and dateTime
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String dateTime = sdf.format(new Date());
+            versionLabel = applicationName + "_" + dateTime;
+        }
+
+        Deployer deployer = new Deployer(getLog());
+        deployer.deploy(artifact, awsAccessKey, awsSecretAccessKey, region, applicationName,
+                environmentName, versionLabel, proxy);
     }
 
 }
