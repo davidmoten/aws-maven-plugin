@@ -14,10 +14,51 @@
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
         <aws.sdk.version>1.10.48</aws.sdk.version>
-        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+        <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
     </properties>
+    
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/davidmoten/aws-maven-plugin</url>
+    </ciManagement>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/davidmoten/aws-maven-plugin/issues</url>
+    </issueManagement>
+
+    <inceptionYear>2016</inceptionYear>
+    <developers>
+        <developer>
+            <id>dave</id>
+            <name>Dave Moten</name>
+            <url>https://github.com/davidmoten/</url>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+10</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>${scm.url}</connection>
+        <developerConnection>${scm.url}</developerConnection>
+        <url>${scm.url}</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
+        
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
@@ -30,6 +71,7 @@
             <scope>provided</scope>
         </dependency>
         
+        <!--  aws -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
@@ -40,6 +82,8 @@
             <artifactId>aws-java-sdk-elasticbeanstalk</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
+        
+        <!-- test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
