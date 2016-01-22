@@ -16,7 +16,7 @@ Add this to the `<plugins>` section of your pom.xml:
 <plugin>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>aws-maven-plugin</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <configuration>
         <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
