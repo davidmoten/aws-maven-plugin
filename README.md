@@ -9,6 +9,8 @@ Easily deploy a zipped artifact (zip or war for instance) to Elastic Beanstalk o
 
 Status: *released to Maven Central*
 
+[Maven reports](http://davidmoten.github.io/aws-maven-plugin/index.html)
+
 ##How to use
 Add this to the `<plugins>` section of your pom.xml:
 
