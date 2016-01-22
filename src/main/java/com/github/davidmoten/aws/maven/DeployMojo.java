@@ -1,9 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -64,10 +62,7 @@ public final class DeployMojo extends AbstractMojo {
 
     private static String createVersionLabel(String applicationName, Date date) {
         // construct version label using application name and dateTime
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String dateTime = sdf.format(date);
-        return applicationName + "_" + dateTime;
+        return applicationName + "_" + Util.formatDateTime(date);
     }
 
 }

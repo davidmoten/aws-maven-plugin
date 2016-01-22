@@ -1,9 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -21,7 +19,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 
 final class Deployer {
 
-    private static final String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
     private final Log log;
 
     Deployer(Log log) {
@@ -42,8 +39,7 @@ final class Deployer {
 
         String bucketName = getS3BucketName(eb);
 
-        String dateTime = Instant.now().atZone(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
+        String dateTime = Util.formatDateTime(new Date());
 
         String objectName = artifact.getName() + "_" + dateTime;
 
