@@ -45,7 +45,7 @@ final class Deployer {
         String dateTime = Instant.now().atZone(ZoneOffset.UTC)
                 .format(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
 
-        String objectName = "artifact." + dateTime;
+        String objectName = artifact.getName() + "_" + dateTime;
 
         uploadArtifact(artifact, credentials, r, cc, bucketName, objectName);
 
