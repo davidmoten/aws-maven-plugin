@@ -1,6 +1,10 @@
 aws-maven-plugin
 -----------------
 
+<a href="https://travis-ci.org/davidmoten/aws-maven-plugin"><img src="https://travis-ci.org/davidmoten/aws-maven-plugin.svg"/></a><br/>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin)<br/>
+<!--[![Dependency Status](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin.svg)](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin)-->
+
 Easily deploy a zipped artifact (zip or war for instance) to Elastic Beanstalk on AWS using maven.
 
 Status: *released to Maven Central*
