@@ -1,6 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
 class Proxy {
+
     final String host;
     final int port;
     final String username;

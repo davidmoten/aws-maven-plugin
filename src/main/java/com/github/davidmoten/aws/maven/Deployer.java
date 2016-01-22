@@ -54,41 +54,6 @@ final class Deployer {
         updateEnvironment(applicationName, environmentName, eb, versionLabel);
     }
 
-    private String getS3BucketName(AWSElasticBeanstalkClient eb) {
-        log.info("getting s3 bucket name to deploy artifact to");
-        String bucketName = eb.createStorageLocation().getS3Bucket();
-        log.info("s3Bucket=" + bucketName);
-        return bucketName;
-    }
-
-    private void uploadArtifact(File artifact, final AWSCredentialsProvider credentials,
-            final Region r, ClientConfiguration cc, String bucketName, String objectName) {
-        AmazonS3Client s3 = new AmazonS3Client(credentials, cc).withRegion(r);
-
-        log.info("uploading " + artifact + " to " + bucketName + ":" + objectName);
-        s3.putObject(bucketName, objectName, artifact);
-    }
-
-    private void createApplicationVersion(String applicationName, AWSElasticBeanstalkClient eb,
-            String bucketName, String objectName, String versionLabel) {
-        log.info("creating version label=" + versionLabel);
-        CreateApplicationVersionRequest request1 = new CreateApplicationVersionRequest()
-                .withApplicationName(applicationName).withAutoCreateApplication(true)
-                .withSourceBundle(new S3Location(bucketName, objectName))
-                .withVersionLabel(versionLabel);
-        eb.createApplicationVersion(request1);
-    }
-
-    private void updateEnvironment(String applicationName, String environmentName,
-            AWSElasticBeanstalkClient eb, String versionLabel) {
-        log.info("requesting update of environment to new version label");
-        UpdateEnvironmentRequest request2 = new UpdateEnvironmentRequest()
-                .withApplicationName(applicationName).withEnvironmentName(environmentName)
-                .withVersionLabel(versionLabel);
-        eb.updateEnvironment(request2);
-        log.info("requested");
-    }
-
     private static ClientConfiguration createConfiguration(Proxy proxy) {
         ClientConfiguration cc = new ClientConfiguration();
         if (proxy.host != null) {
@@ -100,6 +65,40 @@ final class Deployer {
             }
         }
         return cc;
+    }
+
+    private String getS3BucketName(AWSElasticBeanstalkClient eb) {
+        log.info("getting s3 bucket name to deploy artifact to");
+        String bucketName = eb.createStorageLocation().getS3Bucket();
+        log.info("s3Bucket=" + bucketName);
+        return bucketName;
+    }
+
+    private void uploadArtifact(File artifact, final AWSCredentialsProvider credentials,
+            final Region r, ClientConfiguration cc, String bucketName, String objectName) {
+        AmazonS3Client s3 = new AmazonS3Client(credentials, cc).withRegion(r);
+        log.info("uploading " + artifact + " to " + bucketName + ":" + objectName);
+        s3.putObject(bucketName, objectName, artifact);
+    }
+
+    private void createApplicationVersion(String applicationName, AWSElasticBeanstalkClient eb,
+            String bucketName, String objectName, String versionLabel) {
+        log.info("creating version label=" + versionLabel);
+        CreateApplicationVersionRequest request = new CreateApplicationVersionRequest()
+                .withApplicationName(applicationName).withAutoCreateApplication(true)
+                .withSourceBundle(new S3Location(bucketName, objectName))
+                .withVersionLabel(versionLabel);
+        eb.createApplicationVersion(request);
+    }
+
+    private void updateEnvironment(String applicationName, String environmentName,
+            AWSElasticBeanstalkClient eb, String versionLabel) {
+        log.info("requesting update of environment to new version label");
+        UpdateEnvironmentRequest request = new UpdateEnvironmentRequest()
+                .withApplicationName(applicationName).withEnvironmentName(environmentName)
+                .withVersionLabel(versionLabel);
+        eb.updateEnvironment(request);
+        log.info("requested");
     }
 
 }
