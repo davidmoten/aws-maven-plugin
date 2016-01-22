@@ -26,6 +26,9 @@ Add this to the `<plugins>` section of your pom.xml:
         <applicationName>my-application-name</applicationName>
         <environmentName>my-environment-name</environmentName>
         <region>ap-southeast-2</region>
+        <!-- optional versionLabel -->
+        <versionLabel>my-artifact-${maven.build.timestamp}.war</versionLabel>
+        <!-- optional proxy config -->
         <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
