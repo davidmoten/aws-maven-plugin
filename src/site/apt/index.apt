@@ -1,0 +1,12 @@
+ ------
+ AWS Maven Plugin
+ ------
+ ------
+ 
+Description
+
+  Deploys a single file (zip or war for instance) to Elastic Beanstalk on AWS using maven.
+
+Usage
+
+  See the {{{./usage.html}Usage page}}. 
