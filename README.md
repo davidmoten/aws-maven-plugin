@@ -3,6 +3,8 @@ aws-maven-plugin
 
 Easily deploy a zipped artifact (zip or war for instance) to Elastic Beanstalk on AWS using maven.
 
+Status: *released to Maven Central*
+
 ##How to use
 Add this to the `<plugins>` section of your pom.xml:
 
