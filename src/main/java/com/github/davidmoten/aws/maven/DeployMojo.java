@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "deploy")
 public final class DeployMojo extends AbstractMojo {
@@ -45,6 +46,9 @@ public final class DeployMojo extends AbstractMojo {
     @Parameter(property = "versionLabel")
     private String versionLabel;
 
+    @Parameter(defaultValue = "${project}", required = true)
+    private MavenProject project;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -52,7 +56,7 @@ public final class DeployMojo extends AbstractMojo {
                 httpsProxyPassword);
 
         if (versionLabel == null) {
-            versionLabel = createVersionLabel(applicationName, new Date());
+            versionLabel = createVersionLabel(applicationName, new Date(), project.getVersion());
         }
 
         Deployer deployer = new Deployer(getLog());
@@ -60,9 +64,9 @@ public final class DeployMojo extends AbstractMojo {
                 environmentName, versionLabel, proxy);
     }
 
-    private static String createVersionLabel(String applicationName, Date date) {
+    private static String createVersionLabel(String applicationName, Date date, String version) {
         // construct version label using application name and dateTime
-        return applicationName + "_" + Util.formatDateTime(date);
+        return applicationName + "_" + version + "_" + Util.formatDateTime(date);
     }
 
 }
