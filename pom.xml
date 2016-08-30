@@ -87,6 +87,11 @@
             <artifactId>aws-java-sdk-elasticbeanstalk</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-lambda</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
 
         <!-- test -->
         <dependency>
