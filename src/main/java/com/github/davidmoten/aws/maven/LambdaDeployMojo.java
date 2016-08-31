@@ -19,8 +19,8 @@ public final class LambdaDeployMojo extends AbstractMojo {
     @Parameter(property = "functionName")
     private String functionName;
 
-    @Parameter(property = "zipFilename")
-    private String zipFilename;
+    @Parameter(property = "artifact")
+    private String artifact;
 
     @Parameter(property = "region")
     private String region;
@@ -45,6 +45,6 @@ public final class LambdaDeployMojo extends AbstractMojo {
         Proxy proxy = new Proxy(httpsProxyHost, httpsProxyPort, httpsProxyUsername,
                 httpsProxyPassword);
         LambdaDeployer deployer = new LambdaDeployer(getLog());
-        deployer.deploy(awsAccessKey, awsSecretAccessKey, region, zipFilename, functionName, proxy);
+        deployer.deploy(awsAccessKey, awsSecretAccessKey, region, artifact, functionName, proxy);
     }
 }
