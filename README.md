@@ -7,6 +7,7 @@ aws-maven-plugin
 
 * Deploy a zipped artifact (zip or war for instance) to an existing environment on AWS Elastic Beanstalk
 * Deploy a zipped artifact (zip or jar for instance) to an existing function on AWS Lambda
+* Supports java 6+
 
 Status: *released to Maven Central*
 
