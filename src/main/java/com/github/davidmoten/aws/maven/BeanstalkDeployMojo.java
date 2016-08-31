@@ -11,7 +11,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "deploy")
-public final class DeployMojo extends AbstractMojo {
+public final class BeanstalkDeployMojo extends AbstractMojo {
 
     @Parameter(property = "awsAccessKey")
     private String awsAccessKey;
@@ -59,7 +59,7 @@ public final class DeployMojo extends AbstractMojo {
             versionLabel = createVersionLabel(applicationName, new Date(), project.getVersion());
         }
 
-        Deployer deployer = new Deployer(getLog());
+        BeanstalkDeployer deployer = new BeanstalkDeployer(getLog());
         deployer.deploy(artifact, awsAccessKey, awsSecretAccessKey, region, applicationName,
                 environmentName, versionLabel, proxy);
     }

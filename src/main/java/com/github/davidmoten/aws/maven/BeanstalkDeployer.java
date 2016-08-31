@@ -17,11 +17,11 @@ import com.amazonaws.services.elasticbeanstalk.model.S3Location;
 import com.amazonaws.services.elasticbeanstalk.model.UpdateEnvironmentRequest;
 import com.amazonaws.services.s3.AmazonS3Client;
 
-final class Deployer {
+final class BeanstalkDeployer {
 
     private final Log log;
 
-    Deployer(Log log) {
+    BeanstalkDeployer(Log log) {
         this.log = log;
     }
 
@@ -33,7 +33,7 @@ final class Deployer {
 
         final Region r = Region.getRegion(Regions.fromName(region));
 
-        ClientConfiguration cc = createConfiguration(proxy);
+        ClientConfiguration cc = Util.createConfiguration(proxy);
 
         AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials, cc).withRegion(r);
 
@@ -48,19 +48,6 @@ final class Deployer {
         createApplicationVersion(applicationName, eb, bucketName, objectName, versionLabel);
 
         updateEnvironment(applicationName, environmentName, eb, versionLabel);
-    }
-
-    private static ClientConfiguration createConfiguration(Proxy proxy) {
-        ClientConfiguration cc = new ClientConfiguration();
-        if (proxy.host != null) {
-            cc.setProxyHost(proxy.host);
-            cc.setProxyPort(proxy.port);
-            if (proxy.username != null) {
-                cc.setProxyUsername(proxy.username);
-                cc.setProxyPassword(proxy.password);
-            }
-        }
-        return cc;
     }
 
     private String getS3BucketName(AWSElasticBeanstalkClient eb) {
