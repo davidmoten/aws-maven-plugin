@@ -5,7 +5,7 @@
  
 Description
 
-  Deploys a single file (zip or war for instance) to Elastic Beanstalk on AWS using maven.
+  Deploys a single file (zip or war for instance) to Elastic Beanstalk or Lambda on AWS using maven.
 
 Usage
 
