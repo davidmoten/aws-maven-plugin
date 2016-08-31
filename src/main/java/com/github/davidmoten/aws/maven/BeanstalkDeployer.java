@@ -7,8 +7,8 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClient;
@@ -28,7 +28,7 @@ final class BeanstalkDeployer {
     void deploy(File artifact, String accessKey, String secretKey, String region,
             String applicationName, String environmentName, String versionLabel, Proxy proxy) {
 
-        final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
+        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(accessKey, secretKey));
 
         final Region r = Region.getRegion(Regions.fromName(region));

@@ -1,16 +1,16 @@
 package com.github.davidmoten.aws.maven;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.text.DecimalFormat;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambdaClient;
@@ -27,7 +27,7 @@ class LambdaDeployer {
     void deploy(String accessKey, String secretKey, String region, String zipFilename,
             String functionName, Proxy proxy) {
         long t = System.currentTimeMillis();
-        final AWSCredentialsProvider credentials = new StaticCredentialsProvider(
+        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(accessKey, secretKey));
 
         final Region r = Region.getRegion(Regions.fromName(region));
@@ -37,7 +37,7 @@ class LambdaDeployer {
 
         byte[] bytes;
         try {
-            bytes = Files.readAllBytes(new File(zipFilename).toPath());
+            bytes = IOUtils.toByteArray(new FileInputStream(zipFilename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
