@@ -17,6 +17,10 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AccessControlList;
+import com.amazonaws.services.s3.model.GroupGrantee;
+import com.amazonaws.services.s3.model.Permission;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 
 final class S3Deployer {
 
@@ -48,10 +52,15 @@ final class S3Deployer {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                         throws IOException {
+                    AccessControlList acl = new AccessControlList();
+                    acl.grantPermission(GroupGrantee.AllUsers, Permission.Read);
                     String relativePath = root.relativize(file.toAbsolutePath()).toString();
                     String objectName = outputBasePath + "/" + relativePath;
                     log.info("uploading " + file.toFile() + " to " + bucketName + ":" + objectName);
-                    s3.putObject(bucketName, objectName, file.toFile());
+                    PutObjectRequest req = new PutObjectRequest(bucketName, objectName,
+                            file.toFile()) //
+                                    .withAccessControlList(acl);
+                    s3.putObject(req);
                     return FileVisitResult.CONTINUE;
                 }
             });
