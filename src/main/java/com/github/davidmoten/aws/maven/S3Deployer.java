@@ -55,7 +55,12 @@ final class S3Deployer {
                     AccessControlList acl = new AccessControlList();
                     acl.grantPermission(GroupGrantee.AllUsers, Permission.Read);
                     String relativePath = root.relativize(file.toAbsolutePath()).toString();
-                    String objectName = outputBasePath + "/" + relativePath;
+                    String objectName;
+                    if (outputBasePath != null) {
+                        objectName = outputBasePath + "/" + relativePath;
+                    } else {
+                        objectName = relativePath;
+                    }
                     log.info("uploading " + file.toFile() + " to " + bucketName + ":" + objectName);
                     PutObjectRequest req = new PutObjectRequest(bucketName, objectName,
                             file.toFile()) //
