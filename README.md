@@ -7,7 +7,7 @@ aws-maven-plugin
 
 * Deploy a zipped artifact (zip or war for instance) to an existing environment on AWS Elastic Beanstalk
 * Deploy a zipped artifact (zip or jar for instance) to an existing function on AWS Lambda
-* Deploy a directory to an S3 bucket
+* Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
 * Supports java 6+
 * Supports proxy
 
@@ -111,7 +111,9 @@ export AWS_SECRET_ACCESS_KEY=<your_secret>
 mvn package aws:deployLambda
 ```
 ### Deploy directory to S3
-This goal 
+* deploys a directory to a path in an S3 bucket
+* all uploaded files are given public read permissions
+* designed for upload of public websites
 
 Add this to the `<plugins>` section of your pom.xml:
 
