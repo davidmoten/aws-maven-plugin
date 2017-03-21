@@ -17,6 +17,23 @@ Status: *released to Maven Central*
 
 ##How to use
 
+### Authentication
+To authenticate your activities against AWS you can 
+* specify the accessKey and secretAccessKey in the configuration of the plugin, 
+**or** 
+* use a `serverId` defined in `~/.m2/settings.xml`.
+
+To use a `serverId` you'll need xml like this in your `~/.m2/settings.xml`:
+
+```xml
+<server>
+    <id>amsa.aws</id>
+    <username>AWS_ACCESS_KEY_HERE</username>
+    <password>AWS_SECRET_ACCESS_KEY_HERE</password>
+</server>
+```
+Only the password field (secret access key) in the `server` element can be encrypted (as per `mvn -ep`).
+
 ###Deploy to Beanstalk
 Add this to the `<plugins>` section of your pom.xml:
 
@@ -26,6 +43,9 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
         <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         <artifact>${project.build.directory}/my-artifact.war</artifact>
@@ -65,6 +85,9 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
         <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         <artifact>${project.build.directory}/my-artifact.war</artifact>
@@ -123,6 +146,9 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
         <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         <region>ap-southeast-2</region>
