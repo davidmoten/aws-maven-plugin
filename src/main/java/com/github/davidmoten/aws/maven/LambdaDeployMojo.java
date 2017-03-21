@@ -62,5 +62,4 @@ public final class LambdaDeployMojo extends AbstractMojo {
         deployer.deploy(keys, region, artifact, functionName, proxy);
     }
 
-    
 }
