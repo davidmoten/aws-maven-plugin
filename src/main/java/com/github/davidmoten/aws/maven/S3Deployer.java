@@ -30,10 +30,10 @@ final class S3Deployer {
         this.log = log;
     }
 
-    public void deploy(String accessKey, String secretKey, String region, String inputDirectory,
+    public void deploy(AwsKeyPair keyPair, String region, String inputDirectory,
             final String bucketName, final String outputBasePath, Proxy proxy) {
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(accessKey, secretKey));
+                new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
         final Region r = Region.getRegion(Regions.fromName(region));
 

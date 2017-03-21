@@ -3,9 +3,12 @@ package com.github.davidmoten.aws.maven;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.crypto.SettingsDecrypter;
 
 @Mojo(name = "deployS3")
 public final class S3DeployerMojo extends AbstractMojo {
@@ -15,6 +18,9 @@ public final class S3DeployerMojo extends AbstractMojo {
 
     @Parameter(property = "awsSecretAccessKey")
     private String awsSecretAccessKey;
+
+    @Parameter(property = "serverId")
+    private String serverId;
 
     @Parameter(property = "region")
     private String region;
@@ -42,6 +48,12 @@ public final class S3DeployerMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
+    
+    @Component
+    private Settings settings;
+
+    @Component
+    private SettingsDecrypter decrypter;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -50,7 +62,8 @@ public final class S3DeployerMojo extends AbstractMojo {
                 httpsProxyPassword);
 
         S3Deployer deployer = new S3Deployer(getLog());
-        deployer.deploy(awsAccessKey, awsSecretAccessKey, region,  inputDirectory,bucketName,
+        AwsKeyPair keyPair = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings, decrypter);
+        deployer.deploy(keyPair, region,  inputDirectory,bucketName,
                 outputBasePath, proxy);
     }
 

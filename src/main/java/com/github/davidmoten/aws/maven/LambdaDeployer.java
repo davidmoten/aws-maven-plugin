@@ -24,11 +24,11 @@ class LambdaDeployer {
         this.log = log;
     }
 
-    void deploy(String accessKey, String secretKey, String region, String zipFilename,
+    void deploy(AwsKeyPair keyPair, String region, String zipFilename,
             String functionName, Proxy proxy) {
         long t = System.currentTimeMillis();
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(accessKey, secretKey));
+                new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
         final Region r = Region.getRegion(Regions.fromName(region));
 

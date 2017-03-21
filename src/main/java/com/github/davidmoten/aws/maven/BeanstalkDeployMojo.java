@@ -6,9 +6,12 @@ import java.util.Date;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.crypto.SettingsDecrypter;
 
 @Mojo(name = "deploy")
 public final class BeanstalkDeployMojo extends AbstractMojo {
@@ -18,6 +21,9 @@ public final class BeanstalkDeployMojo extends AbstractMojo {
 
     @Parameter(property = "awsSecretAccessKey")
     private String awsSecretAccessKey;
+
+    @Parameter(property = "serverId")
+    private String serverId;
 
     @Parameter(property = "applicationName")
     private String applicationName;
@@ -48,6 +54,12 @@ public final class BeanstalkDeployMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
+    
+    @Component
+    private Settings settings;
+
+    @Component
+    private SettingsDecrypter decrypter;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -60,7 +72,8 @@ public final class BeanstalkDeployMojo extends AbstractMojo {
         }
 
         BeanstalkDeployer deployer = new BeanstalkDeployer(getLog());
-        deployer.deploy(artifact, awsAccessKey, awsSecretAccessKey, region, applicationName,
+        AwsKeyPair keyPair = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings, decrypter);
+        deployer.deploy(artifact, keyPair, region, applicationName,
                 environmentName, versionLabel, proxy);
     }
 

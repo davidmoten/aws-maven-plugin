@@ -3,9 +3,12 @@ package com.github.davidmoten.aws.maven;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.crypto.SettingsDecrypter;
 
 @Mojo(name = "deployLambda")
 public final class LambdaDeployMojo extends AbstractMojo {
@@ -15,6 +18,9 @@ public final class LambdaDeployMojo extends AbstractMojo {
 
     @Parameter(property = "awsSecretAccessKey")
     private String awsSecretAccessKey;
+
+    @Parameter(property = "serverId")
+    private String serverId;
 
     @Parameter(property = "functionName")
     private String functionName;
@@ -40,11 +46,21 @@ public final class LambdaDeployMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
+    @Component
+    private Settings settings;
+
+    @Component
+    private SettingsDecrypter decrypter;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         Proxy proxy = new Proxy(httpsProxyHost, httpsProxyPort, httpsProxyUsername,
                 httpsProxyPassword);
         LambdaDeployer deployer = new LambdaDeployer(getLog());
-        deployer.deploy(awsAccessKey, awsSecretAccessKey, region, artifact, functionName, proxy);
+        AwsKeyPair keys = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings,
+                decrypter);
+        deployer.deploy(keys, region, artifact, functionName, proxy);
     }
+
+    
 }

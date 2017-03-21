@@ -25,11 +25,11 @@ final class BeanstalkDeployer {
         this.log = log;
     }
 
-    void deploy(File artifact, String accessKey, String secretKey, String region,
+    void deploy(File artifact, AwsKeyPair keyPair, String region,
             String applicationName, String environmentName, String versionLabel, Proxy proxy) {
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(accessKey, secretKey));
+                new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
         final Region r = Region.getRegion(Regions.fromName(region));
 
