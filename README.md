@@ -15,7 +15,7 @@ Status: *released to Maven Central*
 
 [Maven reports](http://davidmoten.github.io/aws-maven-plugin/index.html)
 
-##How to use
+## How to use
 
 ### Authentication
 To authenticate your activities against AWS you can 
@@ -34,7 +34,7 @@ To use a `serverId` you'll need xml like this in your `~/.m2/settings.xml`:
 ```
 Only the password field (secret access key) in the `server` element can be encrypted (as per `mvn -ep`).
 
-###Deploy to Beanstalk
+### Deploy to Beanstalk
 Add this to the `<plugins>` section of your pom.xml:
 
 ```xml
@@ -76,7 +76,7 @@ mvn package aws:deploy
 
 The user represented by the AWS access key must have put permission on S3 and full access permission on ElasticBeanstalk.
 
-###Deploy to Lambda
+### Deploy to Lambda
 Add this to the `<plugins>` section of your pom.xml:
 
 ```xml
