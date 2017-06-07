@@ -14,9 +14,8 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AccessControlList;
 import com.amazonaws.services.s3.model.GroupGrantee;
 import com.amazonaws.services.s3.model.Permission;
@@ -30,16 +29,16 @@ final class S3Deployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, String inputDirectory,
-            final String bucketName, final String outputBasePath, Proxy proxy) {
+    public void deploy(AwsKeyPair keyPair, String region, String inputDirectory, final String bucketName,
+            final String outputBasePath, Proxy proxy) {
+
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
-        final Region r = Region.getRegion(Regions.fromName(region));
-
         ClientConfiguration cc = Util.createConfiguration(proxy);
 
-        final AmazonS3Client s3 = new AmazonS3Client(credentials, cc).withRegion(r);
+        final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials).withClientConfiguration(cc)
+                .withRegion(region).build();
 
         if (inputDirectory == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
@@ -50,8 +49,7 @@ final class S3Deployer {
         try {
             Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                        throws IOException {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     AccessControlList acl = new AccessControlList();
                     acl.grantPermission(GroupGrantee.AllUsers, Permission.Read);
                     String relativePath = root.relativize(file.toAbsolutePath()).toString();
@@ -62,9 +60,8 @@ final class S3Deployer {
                         objectName = relativePath;
                     }
                     log.info("uploading " + file.toFile() + " to " + bucketName + ":" + objectName);
-                    PutObjectRequest req = new PutObjectRequest(bucketName, objectName,
-                            file.toFile()) //
-                                    .withAccessControlList(acl);
+                    PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file.toFile()) //
+                            .withAccessControlList(acl);
                     s3.putObject(req);
                     return FileVisitResult.CONTINUE;
                 }
