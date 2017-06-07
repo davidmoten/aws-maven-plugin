@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.maven.plugin.logging.Log;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -19,6 +21,12 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 
 final class CloudFormationDeployer {
+
+    private final Log log;
+
+    CloudFormationDeployer(Log log) {
+        this.log = log;
+    }
 
     public void deploy(AwsKeyPair keyPair, String region, String inputDirectory, final String stackName,
             final String templateBody, Map<String, String> parameters, Proxy proxy) {
@@ -57,18 +65,38 @@ final class CloudFormationDeployer {
                     .withParameters(params));
         }
 
-        // TODO wait
+        Status result = waitForCompletion(cf, stackName);
+        log.info(result.toString());
+        if (!result.value.equals(StackStatus.CREATE_COMPLETE) //
+                && !result.value.equals(StackStatus.UPDATE_COMPLETE)) {
+            throw new RuntimeException("create/update failed: " + result);
+        }
+    }
+
+    private static class Status {
+        final String value;
+        final String reason;
+
+        Status(String value, String reason) {
+            this.value = value;
+            this.reason = reason;
+        }
+
+        @Override
+        public String toString() {
+            return "Status [value=" + value + ", reason=" + reason + "]";
+        }
 
     }
 
-    // Wait for a stack to complete transitioning
+    // Wait for a stack to complete transition
     // End stack states are:
     // CREATE_COMPLETE
     // CREATE_FAILED
     // DELETE_FAILED
     // ROLLBACK_FAILED
     // OR the stack no longer exists
-    public static String waitForCompletion(AmazonCloudFormation stackbuilder, String stackName) throws Exception {
+    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName) {
 
         DescribeStacksRequest wait = new DescribeStacksRequest();
         wait.setStackName(stackName);
@@ -102,13 +130,17 @@ final class CloudFormationDeployer {
 
             // Not done yet so sleep for 10 seconds.
             if (!completed)
-                Thread.sleep(10000);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
         }
 
         // Show we are done
         System.out.print("done\n");
 
-        return stackStatus + " (" + stackReason + ")";
+        return new Status(stackStatus, stackReason);
     }
 
 }
