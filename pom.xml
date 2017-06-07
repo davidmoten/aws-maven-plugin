@@ -91,6 +91,16 @@
             <artifactId>aws-java-sdk-lambda</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-lambda</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cloudformation</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -110,7 +120,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>${maven.compiler.target}</source>
                     <target>${maven.compiler.target}</target>
