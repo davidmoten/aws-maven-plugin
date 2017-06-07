@@ -11,9 +11,8 @@ import org.apache.maven.plugin.logging.Log;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.lambda.AWSLambdaClient;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
 
 class LambdaDeployer {
@@ -24,16 +23,13 @@ class LambdaDeployer {
         this.log = log;
     }
 
-    void deploy(AwsKeyPair keyPair, String region, String zipFilename,
-            String functionName, Proxy proxy) {
+    void deploy(AwsKeyPair keyPair, String region, String zipFilename, String functionName, Proxy proxy) {
         long t = System.currentTimeMillis();
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
-        final Region r = Region.getRegion(Regions.fromName(region));
-
-        AWSLambdaClient lambda = new AWSLambdaClient(credentials, Util.createConfiguration(proxy))
-                .withRegion(r);
+        AWSLambda lambda = AWSLambdaClientBuilder.standard().withCredentials(credentials)
+                .withClientConfiguration(Util.createConfiguration(proxy)).withRegion(region).build();
 
         byte[] bytes;
         try {
@@ -42,9 +38,8 @@ class LambdaDeployer {
             throw new RuntimeException(e);
         }
         DecimalFormat df = new DecimalFormat("0.000");
-        log.info(
-                "deploying " + zipFilename + ", length=" + df.format(bytes.length / 1024.0 / 1024.0)
-                        + "MB, to functionName=" + functionName);
+        log.info("deploying " + zipFilename + ", length=" + df.format(bytes.length / 1024.0 / 1024.0)
+                + "MB, to functionName=" + functionName);
         lambda.updateFunctionCode( //
                 new UpdateFunctionCodeRequest() //
                         .withFunctionName(functionName) //

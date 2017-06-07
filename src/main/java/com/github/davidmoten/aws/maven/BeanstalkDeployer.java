@@ -9,13 +9,13 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClient;
+import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
+import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder;
 import com.amazonaws.services.elasticbeanstalk.model.CreateApplicationVersionRequest;
 import com.amazonaws.services.elasticbeanstalk.model.S3Location;
 import com.amazonaws.services.elasticbeanstalk.model.UpdateEnvironmentRequest;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 final class BeanstalkDeployer {
 
@@ -25,17 +25,16 @@ final class BeanstalkDeployer {
         this.log = log;
     }
 
-    void deploy(File artifact, AwsKeyPair keyPair, String region,
-            String applicationName, String environmentName, String versionLabel, Proxy proxy) {
+    void deploy(File artifact, AwsKeyPair keyPair, String region, String applicationName, String environmentName,
+            String versionLabel, Proxy proxy) {
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
-        final Region r = Region.getRegion(Regions.fromName(region));
-
         ClientConfiguration cc = Util.createConfiguration(proxy);
 
-        AWSElasticBeanstalkClient eb = new AWSElasticBeanstalkClient(credentials, cc).withRegion(r);
+        AWSElasticBeanstalk eb = AWSElasticBeanstalkClientBuilder.standard().withCredentials(credentials)
+                .withClientConfiguration(cc).withRegion(region).build();
 
         String bucketName = getS3BucketName(eb);
 
@@ -43,43 +42,42 @@ final class BeanstalkDeployer {
 
         String objectName = artifact.getName() + "_" + dateTime;
 
-        uploadArtifact(artifact, credentials, r, cc, bucketName, objectName);
+        uploadArtifact(artifact, credentials, region, cc, bucketName, objectName);
 
         createApplicationVersion(applicationName, eb, bucketName, objectName, versionLabel);
 
         updateEnvironment(applicationName, environmentName, eb, versionLabel);
     }
 
-    private String getS3BucketName(AWSElasticBeanstalkClient eb) {
+    private String getS3BucketName(AWSElasticBeanstalk eb) {
         log.info("getting s3 bucket name to deploy artifact to");
         String bucketName = eb.createStorageLocation().getS3Bucket();
         log.info("s3Bucket=" + bucketName);
         return bucketName;
     }
 
-    private void uploadArtifact(File artifact, final AWSCredentialsProvider credentials,
-            final Region r, ClientConfiguration cc, String bucketName, String objectName) {
-        AmazonS3Client s3 = new AmazonS3Client(credentials, cc).withRegion(r);
+    private void uploadArtifact(File artifact, final AWSCredentialsProvider credentials, final String region,
+            ClientConfiguration cc, String bucketName, String objectName) {
+        AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials).withClientConfiguration(cc)
+                .withRegion(region).build();
         log.info("uploading " + artifact + " to " + bucketName + ":" + objectName);
         s3.putObject(bucketName, objectName, artifact);
     }
 
-    private void createApplicationVersion(String applicationName, AWSElasticBeanstalkClient eb,
-            String bucketName, String objectName, String versionLabel) {
+    private void createApplicationVersion(String applicationName, AWSElasticBeanstalk eb, String bucketName,
+            String objectName, String versionLabel) {
         log.info("creating version label=" + versionLabel);
         CreateApplicationVersionRequest request = new CreateApplicationVersionRequest()
                 .withApplicationName(applicationName).withAutoCreateApplication(true)
-                .withSourceBundle(new S3Location(bucketName, objectName))
-                .withVersionLabel(versionLabel);
+                .withSourceBundle(new S3Location(bucketName, objectName)).withVersionLabel(versionLabel);
         eb.createApplicationVersion(request);
     }
 
-    private void updateEnvironment(String applicationName, String environmentName,
-            AWSElasticBeanstalkClient eb, String versionLabel) {
+    private void updateEnvironment(String applicationName, String environmentName, AWSElasticBeanstalk eb,
+            String versionLabel) {
         log.info("requesting update of environment to new version label");
-        UpdateEnvironmentRequest request = new UpdateEnvironmentRequest()
-                .withApplicationName(applicationName).withEnvironmentName(environmentName)
-                .withVersionLabel(versionLabel);
+        UpdateEnvironmentRequest request = new UpdateEnvironmentRequest().withApplicationName(applicationName)
+                .withEnvironmentName(environmentName).withVersionLabel(versionLabel);
         eb.updateEnvironment(request);
         log.info("requested");
     }
