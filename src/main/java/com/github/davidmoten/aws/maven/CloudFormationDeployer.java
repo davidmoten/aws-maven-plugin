@@ -28,7 +28,7 @@ final class CloudFormationDeployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, String inputDirectory, final String stackName,
+    public void deploy(AwsKeyPair keyPair, String region, final String stackName,
             final String templateBody, Map<String, String> parameters, Proxy proxy) {
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
@@ -65,7 +65,7 @@ final class CloudFormationDeployer {
                     .withParameters(params));
         }
 
-        Status result = waitForCompletion(cf, stackName);
+        Status result = waitForCompletion(cf, stackName, log);
         log.info(result.toString());
         if (!result.value.equals(StackStatus.CREATE_COMPLETE) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE)) {
@@ -95,50 +95,46 @@ final class CloudFormationDeployer {
     // CREATE_FAILED
     // DELETE_FAILED
     // ROLLBACK_FAILED
-    // OR the stack no longer exists
-    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName) {
+    // NO_SUCH_STACK
+    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName,
+            Log log) {
 
-        DescribeStacksRequest wait = new DescribeStacksRequest();
-        wait.setStackName(stackName);
-        Boolean completed = false;
+        DescribeStacksRequest wait = new DescribeStacksRequest().withStackName(stackName);
         String stackStatus = "Unknown";
         String stackReason = "";
 
-        System.out.print("Waiting");
+        log.info("waiting for create/update of " + stackName);
 
-        while (!completed) {
+        while (true) {
             List<Stack> stacks = stackbuilder.describeStacks(wait).getStacks();
             if (stacks.isEmpty()) {
-                completed = true;
                 stackStatus = "NO_SUCH_STACK";
                 stackReason = "Stack has been deleted";
             } else {
-                for (Stack stack : stacks) {
-                    if (stack.getStackStatus().equals(StackStatus.CREATE_COMPLETE.toString())
-                            || stack.getStackStatus().equals(StackStatus.CREATE_FAILED.toString())
-                            || stack.getStackStatus().equals(StackStatus.ROLLBACK_FAILED.toString())
-                            || stack.getStackStatus().equals(StackStatus.DELETE_FAILED.toString())) {
-                        completed = true;
-                        stackStatus = stack.getStackStatus();
-                        stackReason = stack.getStackStatusReason();
-                    }
+                //should just be one stack
+                Stack stack = stacks.iterator().next();
+                String ss = stack.getStackStatus();
+                // Show we are waiting
+                log.info(ss);
+                if (ss.equals(StackStatus.CREATE_COMPLETE.toString())
+                        || ss.equals(StackStatus.CREATE_FAILED.toString())
+                        || ss.equals(StackStatus.ROLLBACK_FAILED.toString())
+                        || ss.equals(StackStatus.DELETE_FAILED.toString())) {
+                    stackStatus = ss;
+                    stackReason = stack.getStackStatusReason();
+                    break;
                 }
             }
 
-            // Show we are waiting
-            System.out.print(".");
-
             // Not done yet so sleep for 10 seconds.
-            if (!completed)
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
-
         // Show we are done
-        System.out.print("done\n");
+        log.info("\ndone\n");
 
         return new Status(stackStatus, stackReason);
     }
