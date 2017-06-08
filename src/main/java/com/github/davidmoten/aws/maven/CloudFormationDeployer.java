@@ -12,6 +12,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
+import com.amazonaws.services.cloudformation.model.Capability;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
@@ -57,18 +58,32 @@ final class CloudFormationDeployer {
             cf.createStack(new CreateStackRequest() //
                     .withStackName(stackName) //
                     .withTemplateBody(templateBody) //
-                    .withParameters(params));
+                    .withParameters(params) //
+                    .withCapabilities(Capability.CAPABILITY_IAM) //
+                    .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
         } else {
-            cf.updateStack(new UpdateStackRequest() //
-                    .withStackName(stackName) //
-                    .withTemplateBody(templateBody) //
-                    .withParameters(params));
+            try {
+                cf.updateStack(new UpdateStackRequest() //
+                        .withStackName(stackName) //
+                        .withTemplateBody(templateBody) //
+                        .withParameters(params) //
+                        .withCapabilities(Capability.CAPABILITY_IAM) //
+                        .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
+            } catch (RuntimeException e) {
+                log.info(e.getMessage());
+                // see
+                if (e.getMessage() != null && e.getMessage().contains("ValidationError")
+                        && e.getMessage().contains("No updates are to be performed")) {
+                    return;
+                } else {
+                    throw e;
+                }
+            }
         }
 
         Status result = waitForCompletion(cf, stackName, log);
-        log.info(result.toString());
-        if (!result.value.equals(StackStatus.CREATE_COMPLETE) //
-                && !result.value.equals(StackStatus.UPDATE_COMPLETE)) {
+        if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
+                && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);
         }
     }
@@ -84,7 +99,7 @@ final class CloudFormationDeployer {
 
         @Override
         public String toString() {
-            return "Status [value=" + value + ", reason=" + reason + "]";
+            return "Status [value=" + value + ", reason=" + (reason == null ? "" : reason) + "]";
         }
 
     }
@@ -110,14 +125,24 @@ final class CloudFormationDeployer {
             if (stacks.isEmpty()) {
                 stackStatus = "NO_SUCH_STACK";
                 stackReason = "Stack has been deleted";
+                log.info(stackStatus);
+                break;
             } else {
-                //should just be one stack
+                // should just be one stack
                 Stack stack = stacks.iterator().next();
                 String ss = stack.getStackStatus();
                 // Show we are waiting
-                log.info(ss);
+                String sr = stack.getStackStatusReason();
+                String msg = ss;
+                if (sr != null) {
+                    msg = msg + " - " + sr;
+                }
+                log.info(msg);
                 if (ss.equals(StackStatus.CREATE_COMPLETE.toString())
                         || ss.equals(StackStatus.CREATE_FAILED.toString())
+                        || ss.equals(StackStatus.UPDATE_COMPLETE.toString())
+                        || ss.equals(StackStatus.UPDATE_ROLLBACK_COMPLETE.toString())
+                        || ss.equals(StackStatus.UPDATE_ROLLBACK_FAILED.toString())
                         || ss.equals(StackStatus.ROLLBACK_FAILED.toString())
                         || ss.equals(StackStatus.DELETE_FAILED.toString())) {
                     stackStatus = ss;
@@ -128,14 +153,11 @@ final class CloudFormationDeployer {
 
             // Not done yet so sleep for 10 seconds.
             try {
-                Thread.sleep(10000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        // Show we are done
-        log.info("\ndone\n");
-
         return new Status(stackStatus, stackReason);
     }
 

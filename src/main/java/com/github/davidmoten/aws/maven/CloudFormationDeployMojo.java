@@ -72,7 +72,8 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
         try {
             bytes = Files.readAllBytes(template.toPath());
         } catch (IOException e) {
-            throw new MojoFailureException("could not read template=" + template + ": " + e.getMessage(), e);
+            throw new MojoFailureException(
+                    "could not read template=" + template + ": " + e.getMessage(), e);
         }
 
         // Note UTF-16 is possible also if starts with byte-order mark, see yaml
