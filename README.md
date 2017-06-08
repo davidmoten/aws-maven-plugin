@@ -190,12 +190,12 @@ To create or update a stack in CloudFormation (bulk create/modify resources in A
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         <region>ap-southeast-2</region>
         <stackName>myStack</stackName>
-	    <template>src/main/aws/cloudformation.yaml</template>
-	    <parameters>
+        <template>src/main/aws/cloudformation.yaml</template>
+        <parameters>
             <mode>dev</mode>
             <version>6.01</version>
         </parameters>
-	    <intervalSeconds>2</intervalSeconds>
+        <intervalSeconds>2</intervalSeconds>
         <!-- optional proxy config -->
         <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
