@@ -3,7 +3,6 @@ package com.github.davidmoten.aws.maven;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.apache.maven.plugin.logging.Log;
 
