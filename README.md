@@ -8,6 +8,7 @@ aws-maven-plugin
 * Deploy a zipped artifact (zip or war for instance) to an existing environment on AWS Elastic Beanstalk
 * Deploy a zipped artifact (zip or jar for instance) to an existing function on AWS Lambda
 * Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
+* Create/Update a stack on CloudFormation
 * Supports java 7+
 * Supports proxy
 
@@ -170,6 +171,44 @@ Notes:
 export AWS_ACCESS_KEY=<your_key>
 export AWS_SECRET_ACCESS_KEY=<your_secret>
 mvn package aws:deployS3
+```
+
+### Create/Update CloudfFormation stack
+
+To create or update a stack in CloudFormation (bulk create/modify resources in AWS using a declarative definition) specify the name of the stack, the template and its parameters to the plugin as below.
+
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>aws-maven-plugin</artifactId>
+    <version>[LATEST_VERSION]</version>
+    <configuration>
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
+        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <region>ap-southeast-2</region>
+        <stackName>myStack</stackName>
+	    <template>src/main/aws/cloudformation.yaml</template>
+	    <parameters>
+            <mode>dev</mode>
+            <version>6.01</version>
+        </parameters>
+	    <intervalSeconds>2</intervalSeconds>
+        <!-- optional proxy config -->
+        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyPort>8080</httpsProxyPort>
+        <httpsProxyUsername>user</httpsProxyUsername>
+        <httpsProxyPassword>pass</httpsProxyPassword>
+    </configuration>
+</plugin>
+```
+
+and call 
+
+```bash
+mvn package aws:deployCf
 ```
 
 Nice and easy! (Let me know if you have any problems!)
