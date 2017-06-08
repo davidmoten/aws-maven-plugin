@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -25,6 +26,9 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
     @Parameter(property = "awsSecretAccessKey")
     private String awsSecretAccessKey;
 
+    @Parameter(property = "region")
+    private String region;
+
     @Parameter(property = "serverId")
     private String serverId;
 
@@ -37,8 +41,8 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
     @Parameter(property = "stackTemplate")
     private File template;
 
-    @Parameter(property = "region")
-    private String region;
+    @Parameter(property = "intervalSeconds")
+    private Integer intervalSeconds;
 
     @Parameter(property = "httpsProxyHost")
     private String httpsProxyHost;
@@ -77,9 +81,11 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
         }
 
         // Note UTF-16 is possible also if starts with byte-order mark, see yaml
-        // docs
+        // docs. Not going to worry about detecting UTF-16 until someone
+        // complains!
         String templateBody = new String(bytes, StandardCharsets.UTF_8);
-        deployer.deploy(keys, region, stackName, templateBody, parameters, proxy);
+        deployer.deploy(keys, region, stackName, templateBody, parameters,
+                Optional.ofNullable(intervalSeconds), proxy);
     }
 
 }

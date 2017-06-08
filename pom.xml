@@ -13,7 +13,7 @@
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <aws.sdk.version>1.11.141</aws.sdk.version>
+        <aws.sdk.version>1.11.142</aws.sdk.version>
         <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
     </properties>
 
@@ -122,6 +122,7 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- override default to fix a bug in earlier version (bug seen in 3.2) -->
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.5</version>
             </plugin>

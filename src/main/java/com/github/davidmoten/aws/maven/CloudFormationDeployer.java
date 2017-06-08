@@ -3,6 +3,7 @@ package com.github.davidmoten.aws.maven;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -20,6 +21,7 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
+import com.google.common.base.Preconditions;
 
 final class CloudFormationDeployer {
 
@@ -30,7 +32,12 @@ final class CloudFormationDeployer {
     }
 
     public void deploy(AwsKeyPair keyPair, String region, final String stackName,
-            final String templateBody, Map<String, String> parameters, Proxy proxy) {
+            final String templateBody, Map<String, String> parameters,
+            Optional<Integer> intervalSeconds, Proxy proxy) {
+        Preconditions.checkArgument(!intervalSeconds.isPresent() || intervalSeconds.get() > 0,
+                "intervalSeconds must be greater than 0");
+        Preconditions.checkArgument(!intervalSeconds.isPresent() || intervalSeconds.get() <= 600,
+                "intervalSeconds must be less than or equal to 600");
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
@@ -45,15 +52,20 @@ final class CloudFormationDeployer {
                 .build();
 
         Parameter params = new Parameter();
-        for (Entry<String, String> entry : parameters.entrySet()) {
-            params = params.withParameterKey(entry.getKey()) //
-                    .withParameterValue(entry.getValue());
+        if (parameters != null) {
+            for (Entry<String, String> entry : parameters.entrySet()) {
+                params = params //
+                        .withParameterKey(entry.getKey()) //
+                        .withParameterValue(entry.getValue());
+            }
         }
 
+        // check if stack exists
         ListStacksResult r = cf.listStacks();
         boolean exists = r.getStackSummaries() //
                 .stream() //
                 .anyMatch(x -> x.getStackName().equals(stackName));
+
         if (!exists) {
             cf.createStack(new CreateStackRequest() //
                     .withStackName(stackName) //
@@ -71,7 +83,7 @@ final class CloudFormationDeployer {
                         .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
             } catch (RuntimeException e) {
                 log.info(e.getMessage());
-                // see
+                // see https://github.com/hashicorp/terraform/issues/5653
                 if (e.getMessage() != null && e.getMessage().contains("ValidationError")
                         && e.getMessage().contains("No updates are to be performed")) {
                     return;
@@ -80,8 +92,8 @@ final class CloudFormationDeployer {
                 }
             }
         }
-
-        Status result = waitForCompletion(cf, stackName, log);
+        int intervalMs = intervalSeconds.orElse(5) * 1000; 
+        Status result = waitForCompletion(cf, stackName, intervalMs,log);
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);
@@ -112,7 +124,7 @@ final class CloudFormationDeployer {
     // ROLLBACK_FAILED
     // NO_SUCH_STACK
     public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName,
-            Log log) {
+            int intervalMs, Log log) {
 
         DescribeStacksRequest wait = new DescribeStacksRequest().withStackName(stackName);
         String stackStatus = "Unknown";
@@ -153,7 +165,7 @@ final class CloudFormationDeployer {
 
             // Not done yet so sleep for 10 seconds.
             try {
-                Thread.sleep(5000);
+                Thread.sleep(intervalMs);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
