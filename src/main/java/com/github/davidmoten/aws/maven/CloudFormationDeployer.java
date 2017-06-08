@@ -32,11 +32,10 @@ final class CloudFormationDeployer {
     }
 
     public void deploy(AwsKeyPair keyPair, String region, final String stackName,
-            final String templateBody, Map<String, String> parameters,
-            Optional<Integer> intervalSeconds, Proxy proxy) {
-        Preconditions.checkArgument(!intervalSeconds.isPresent() || intervalSeconds.get() > 0,
-                "intervalSeconds must be greater than 0");
-        Preconditions.checkArgument(!intervalSeconds.isPresent() || intervalSeconds.get() <= 600,
+            final String templateBody, Map<String, String> parameters, int intervalSeconds,
+            Proxy proxy) {
+        Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
+        Preconditions.checkArgument(intervalSeconds <= 600,
                 "intervalSeconds must be less than or equal to 600");
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
@@ -92,8 +91,8 @@ final class CloudFormationDeployer {
                 }
             }
         }
-        int intervalMs = intervalSeconds.orElse(5) * 1000; 
-        Status result = waitForCompletion(cf, stackName, intervalMs,log);
+        int intervalMs = intervalSeconds * 1000;
+        Status result = waitForCompletion(cf, stackName, intervalMs, log);
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);

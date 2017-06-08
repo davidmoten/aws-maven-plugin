@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,8 +40,8 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
     @Parameter(property = "stackTemplate")
     private File template;
 
-    @Parameter(property = "intervalSeconds")
-    private Integer intervalSeconds;
+    @Parameter(property = "intervalSeconds", defaultValue="5")
+    private int intervalSeconds;
 
     @Parameter(property = "httpsProxyHost")
     private String httpsProxyHost;
@@ -85,7 +84,7 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
         // complains!
         String templateBody = new String(bytes, StandardCharsets.UTF_8);
         deployer.deploy(keys, region, stackName, templateBody, parameters,
-                Optional.ofNullable(intervalSeconds), proxy);
+                intervalSeconds, proxy);
     }
 
 }
