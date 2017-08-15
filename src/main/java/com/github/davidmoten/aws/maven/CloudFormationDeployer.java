@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,8 +13,11 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.Capability;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
+import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
@@ -30,12 +34,10 @@ final class CloudFormationDeployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, final String stackName,
-            final String templateBody, Map<String, String> parameters, int intervalSeconds,
-            Proxy proxy) {
+    public void deploy(AwsKeyPair keyPair, String region, final String stackName, final String templateBody,
+            Map<String, String> parameters, int intervalSeconds, Proxy proxy) {
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
-        Preconditions.checkArgument(intervalSeconds <= 600,
-                "intervalSeconds must be less than or equal to 600");
+        Preconditions.checkArgument(intervalSeconds <= 600, "intervalSeconds must be less than or equal to 600");
 
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
@@ -58,11 +60,47 @@ final class CloudFormationDeployer {
             }
         }
 
+        {
+            // list history of application
+            log.info("------------------------------");
+            log.info("Stack history");
+            log.info("------------------------------");
+            ListStacksResult r = cf.listStacks();
+            r.getStackSummaries() //
+                    .stream() //
+                    .filter(x -> x.getStackName().equals(stackName)) //
+                    .forEach(
+                            x -> log.info(String.format("name=%s, id=%s, updated=%s, created=%s, deleted=%s, status=%s",
+                                    x.getStackName(), x.getStackId(), x.getLastUpdatedTime(), x.getCreationTime(),
+                                    x.getDeletionTime(), x.getStackStatus())));
+        }
+
+        int statusPollingIntervalMs = intervalSeconds * 1000;
+
+        {
+            // delete an application in ROLLBACK_COMPLETE status
+
+            ListStacksResult r = cf.listStacks();
+            r.getStackSummaries() //
+                    .stream() //
+                    .filter(x -> x.getStackName().equals(stackName)) //
+                    .limit(1) //
+                    .filter(x -> StackStatus.ROLLBACK_COMPLETE.toString().equals(x.getStackStatus())) //
+                    .forEach(x -> {
+                        log.info("Deleting stack with status " + x.getStackStatus()); //
+                        cf.deleteStack(new DeleteStackRequest().withStackName(stackName));
+                        waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
+                    });
+
+        }
+
         // check if stack exists
         ListStacksResult r = cf.listStacks();
+
         boolean exists = r.getStackSummaries() //
                 .stream() //
-                .anyMatch(x -> x.getStackName().equals(stackName));
+                .anyMatch(x -> x.getStackName().equals(stackName)
+                        && !StackStatus.DELETE_COMPLETE.name().equals(x.getStackStatus()));
 
         if (!exists) {
             cf.createStack(new CreateStackRequest() //
@@ -90,8 +128,7 @@ final class CloudFormationDeployer {
                 }
             }
         }
-        int intervalMs = intervalSeconds * 1000;
-        Status result = waitForCompletion(cf, stackName, intervalMs, log);
+        Status result = waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);
@@ -121,17 +158,23 @@ final class CloudFormationDeployer {
     // DELETE_FAILED
     // ROLLBACK_FAILED
     // NO_SUCH_STACK
-    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName,
-            int intervalMs, Log log) {
+    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName, int intervalMs,
+            Log log) {
 
-        DescribeStacksRequest wait = new DescribeStacksRequest().withStackName(stackName);
+        DescribeStacksRequest describeRequest = new DescribeStacksRequest().withStackName(stackName);
         String stackStatus = "Unknown";
         String stackReason = "";
 
         log.info("waiting for create/update of " + stackName);
 
         while (true) {
-            List<Stack> stacks = stackbuilder.describeStacks(wait).getStacks();
+            List<Stack> stacks;
+            try {
+                stacks = stackbuilder.describeStacks(describeRequest).getStacks();
+            } catch (AmazonCloudFormationException e) {
+                log.warn(e.getMessage());
+                stacks = Collections.emptyList();
+            }
             if (stacks.isEmpty()) {
                 stackStatus = "NO_SUCH_STACK";
                 stackReason = "Stack has been deleted";
@@ -148,14 +191,14 @@ final class CloudFormationDeployer {
                     msg = msg + " - " + sr;
                 }
                 log.info(msg);
-                if (ss.equals(StackStatus.CREATE_COMPLETE.toString())
-                        || ss.equals(StackStatus.CREATE_FAILED.toString())
+                if (ss.equals(StackStatus.CREATE_COMPLETE.toString()) || ss.equals(StackStatus.CREATE_FAILED.toString())
                         || ss.equals(StackStatus.UPDATE_COMPLETE.toString())
                         || ss.equals(StackStatus.UPDATE_ROLLBACK_COMPLETE.toString())
                         || ss.equals(StackStatus.UPDATE_ROLLBACK_FAILED.toString())
                         || ss.equals(StackStatus.ROLLBACK_FAILED.toString())
                         || ss.equals(StackStatus.ROLLBACK_COMPLETE.toString())
-                        || ss.equals(StackStatus.DELETE_FAILED.toString())) {
+                        || ss.equals(StackStatus.DELETE_FAILED.toString())
+                        || ss.equals(StackStatus.DELETE_COMPLETE.toString())) {
                     stackStatus = ss;
                     stackReason = stack.getStackStatusReason();
                     break;
