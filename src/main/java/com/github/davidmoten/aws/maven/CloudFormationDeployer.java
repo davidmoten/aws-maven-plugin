@@ -154,6 +154,7 @@ final class CloudFormationDeployer {
                         || ss.equals(StackStatus.UPDATE_ROLLBACK_COMPLETE.toString())
                         || ss.equals(StackStatus.UPDATE_ROLLBACK_FAILED.toString())
                         || ss.equals(StackStatus.ROLLBACK_FAILED.toString())
+                        || ss.equals(StackStatus.ROLLBACK_COMPLETE.toString())
                         || ss.equals(StackStatus.DELETE_FAILED.toString())) {
                     stackStatus = ss;
                     stackReason = stack.getStackStatusReason();
