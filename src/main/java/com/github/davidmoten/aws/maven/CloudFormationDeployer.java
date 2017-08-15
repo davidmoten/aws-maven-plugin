@@ -17,7 +17,6 @@ import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException
 import com.amazonaws.services.cloudformation.model.Capability;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
@@ -63,16 +62,19 @@ final class CloudFormationDeployer {
         {
             // list history of application
             log.info("------------------------------");
-            log.info("Stack history");
+            log.info("Stack history - " + stackName);
             log.info("------------------------------");
             ListStacksResult r = cf.listStacks();
             r.getStackSummaries() //
                     .stream() //
                     .filter(x -> x.getStackName().equals(stackName)) //
-                    .forEach(
-                            x -> log.info(String.format("name=%s, id=%s, updated=%s, created=%s, deleted=%s, status=%s",
-                                    x.getStackName(), x.getStackId(), x.getLastUpdatedTime(), x.getCreationTime(),
-                                    x.getDeletionTime(), x.getStackStatus())));
+                    .forEach(x -> {
+                        log.info("id=" + x.getStackId());
+                        log.info("  status=" + x.getStackStatus());
+                        log.info("  created=" + x.getCreationTime());
+                        log.info("  update=" + x.getLastUpdatedTime());
+                        log.info("  deleted=" + x.getDeletionTime());
+                    });
         }
 
         int statusPollingIntervalMs = intervalSeconds * 1000;
