@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -160,19 +161,19 @@ final class CloudFormationDeployer {
     // DELETE_FAILED
     // ROLLBACK_FAILED
     // NO_SUCH_STACK
-    public static Status waitForCompletion(AmazonCloudFormation stackbuilder, String stackName, int intervalMs,
-            Log log) {
+    public static Status waitForCompletion(AmazonCloudFormation cf, String stackName, int intervalMs, Log log) {
 
         DescribeStacksRequest describeRequest = new DescribeStacksRequest().withStackName(stackName);
         String stackStatus = "Unknown";
         String stackReason = "";
 
-        log.info("waiting for create/update of " + stackName);
+        log.info("waiting for action on  " + stackName);
+        long t = System.currentTimeMillis();
 
         while (true) {
             List<Stack> stacks;
             try {
-                stacks = stackbuilder.describeStacks(describeRequest).getStacks();
+                stacks = cf.describeStacks(describeRequest).getStacks();
             } catch (AmazonCloudFormationException e) {
                 log.warn(e.getMessage());
                 stacks = Collections.emptyList();
@@ -180,7 +181,7 @@ final class CloudFormationDeployer {
             if (stacks.isEmpty()) {
                 stackStatus = "NO_SUCH_STACK";
                 stackReason = "Stack has been deleted";
-                log.info(stackStatus);
+                log.info(time(t) + " " + stackStatus);
                 break;
             } else {
                 // should just be one stack
@@ -192,7 +193,7 @@ final class CloudFormationDeployer {
                 if (sr != null) {
                     msg = msg + " - " + sr;
                 }
-                log.info(msg);
+                log.info(time(t) + " " + msg);
                 if (ss.equals(StackStatus.CREATE_COMPLETE.toString()) || ss.equals(StackStatus.CREATE_FAILED.toString())
                         || ss.equals(StackStatus.UPDATE_COMPLETE.toString())
                         || ss.equals(StackStatus.UPDATE_ROLLBACK_COMPLETE.toString())
@@ -215,6 +216,13 @@ final class CloudFormationDeployer {
             }
         }
         return new Status(stackStatus, stackReason);
+    }
+
+    private static String time(long start) {
+        long s = (System.currentTimeMillis() - start) / 1000;
+        long a = s % 60;
+        long b = s / 60;
+        return String.format("%02d:%02d", a, b);
     }
 
 }
