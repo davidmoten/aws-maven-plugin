@@ -46,7 +46,7 @@ public final class LambdaDeployMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
-    @Component
+    @Parameter(defaultValue="${settings}", readonly=true)
     private Settings settings;
 
     @Component

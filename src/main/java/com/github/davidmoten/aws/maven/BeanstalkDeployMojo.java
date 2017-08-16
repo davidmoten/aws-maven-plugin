@@ -55,7 +55,7 @@ public final class BeanstalkDeployMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
     
-    @Component
+    @Parameter(defaultValue="${settings}", readonly=true)
     private Settings settings;
 
     @Component

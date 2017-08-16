@@ -220,8 +220,8 @@ final class CloudFormationDeployer {
 
     private static String time(long start) {
         long s = (System.currentTimeMillis() - start) / 1000;
-        long a = s % 60;
-        long b = s / 60;
+        long a = s / 60;
+        long b = s % 60;
         return String.format("%02d:%02d", a, b);
     }
 

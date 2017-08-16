@@ -47,8 +47,8 @@ final class S3FileDeployer {
         PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file);
 
         s3.putObject(req);
-        
-        log.info("uploaded file to s3");
+
+        log.info("deployed " + file.getName() + " to s3 " + bucketName + ":" + objectName);
 
     }
 
