@@ -18,6 +18,8 @@ import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException
 import com.amazonaws.services.cloudformation.model.Capability;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
@@ -98,9 +100,7 @@ final class CloudFormationDeployer {
         }
 
         // check if stack exists
-        ListStacksResult r = cf.listStacks();
-
-        boolean exists = r.getStackSummaries() //
+        boolean exists = cf.listStacks().getStackSummaries() //
                 .stream() //
                 .anyMatch(x -> x.getStackName().equals(stackName)
                         && !StackStatus.DELETE_COMPLETE.name().equals(x.getStackStatus()));
@@ -132,10 +132,35 @@ final class CloudFormationDeployer {
             }
         }
         Status result = waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
+
+        // write out events
+        displayEvents(stackName, cf);
+
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);
         }
+    }
+
+    private void displayEvents(final String stackName, AmazonCloudFormation cf) {
+        // list history of application
+        log.info("------------------------------");
+        log.info("Event history - " + stackName);
+        log.info("------------------------------");
+        DescribeStackEventsResult r = cf.describeStackEvents(new DescribeStackEventsRequest().withStackName(stackName));
+        r.getStackEvents() //
+                .stream() //
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp())) //
+                .forEach(x -> {
+                    log.info(x.getTimestamp() + " status=" + x.getResourceStatus());
+                    log.info("  type=" + x.getResourceType());
+                    log.info("  reason=" + x.getResourceStatusReason());
+                    if (x.getResourceStatusReason() != null) {
+                        log.info("  properties=\n");
+                        log.info(x.getResourceProperties());
+                    }
+                    log.info("-----------------------------------------------");
+                });
     }
 
     private static class Status {
