@@ -1,7 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

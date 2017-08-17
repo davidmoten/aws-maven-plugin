@@ -30,7 +30,7 @@ final class S3FileDeployer {
     }
 
     public void deploy(AwsKeyPair keyPair, String region, File file, final String bucketName, final String objectName,
-            Proxy proxy) {
+            Proxy proxy, boolean create) {
 
         if (file == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
@@ -41,9 +41,20 @@ final class S3FileDeployer {
 
         ClientConfiguration cc = Util.createConfiguration(proxy);
 
-        final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials).withClientConfiguration(cc)
-                .withRegion(region).build();
+        final AmazonS3 s3 = AmazonS3ClientBuilder.standard() //
+                .withCredentials(credentials) //
+                .withClientConfiguration(cc) //
+                .withRegion(region) //
+                .build();
 
+        if (create) {
+            if (!s3.doesBucketExist(bucketName)) {
+                log.info("bucket does not exist so creating");
+                s3.createBucket(bucketName);
+                log.info("created bucket "+ bucketName);
+            }
+        }
+        
         PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file);
 
         s3.putObject(req);

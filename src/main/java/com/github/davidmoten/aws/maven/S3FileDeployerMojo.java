@@ -36,6 +36,9 @@ public final class S3FileDeployerMojo extends AbstractMojo {
     @Parameter(property = "objectName")
     private String objectName;
 
+    @Parameter(property = "create", defaultValue = "false")
+    private boolean create;
+
     @Parameter(property = "httpsProxyHost")
     private String httpsProxyHost;
 
@@ -51,7 +54,7 @@ public final class S3FileDeployerMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
-    @Parameter(defaultValue="${settings}", readonly=true)
+    @Parameter(defaultValue = "${settings}", readonly = true)
     private Settings settings;
 
     @Component
@@ -64,7 +67,7 @@ public final class S3FileDeployerMojo extends AbstractMojo {
 
         S3FileDeployer deployer = new S3FileDeployer(getLog());
         AwsKeyPair keyPair = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings, decrypter);
-        deployer.deploy(keyPair, region, file, bucketName, objectName, proxy);
+        deployer.deploy(keyPair, region, file, bucketName, objectName, proxy, create);
     }
 
 }
