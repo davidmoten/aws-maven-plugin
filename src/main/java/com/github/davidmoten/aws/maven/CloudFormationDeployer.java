@@ -1,11 +1,12 @@
 package com.github.davidmoten.aws.maven;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -55,13 +56,15 @@ final class CloudFormationDeployer {
                 .withRegion(region) //
                 .build();
 
-        Parameter params = new Parameter();
+        final List<Parameter> params;
         if (parameters != null) {
-            for (Entry<String, String> entry : parameters.entrySet()) {
-                params = params //
-                        .withParameterKey(entry.getKey()) //
-                        .withParameterValue(entry.getValue());
-            }
+            params = parameters //
+                    .entrySet() //
+                    .stream() //
+                    .map(p -> new Parameter().withParameterKey(p.getKey()).withParameterValue(p.getValue())) //
+                    .collect(Collectors.toList());
+        } else {
+            params = new ArrayList<>();
         }
 
         {
@@ -160,7 +163,7 @@ final class CloudFormationDeployer {
                 .filter(x -> x.getTimestamp().getTime() >= sinceTime - TimeUnit.MINUTES.toMillis(1)) //
                 .forEach(x -> {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddd HH:mm:ss");
-                    log.info(sdf.format(x.getTimestamp()) + " " +  x.getResourceStatus() + " " + x.getResourceType());
+                    log.info(sdf.format(x.getTimestamp()) + " " + x.getResourceStatus() + " " + x.getResourceType());
                     if (x.getResourceStatusReason() != null) {
                         log.info("  reason=" + x.getResourceStatusReason());
                         if (x.getResourceProperties() != null) {
