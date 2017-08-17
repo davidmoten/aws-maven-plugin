@@ -83,6 +83,7 @@ final class CloudFormationDeployer {
                         log.info("  update=" + x.getLastUpdatedTime());
                         log.info("  deleted=" + x.getDeletionTime());
                     });
+            log.info("");
         }
 
         int statusPollingIntervalMs = intervalSeconds * 1000;
