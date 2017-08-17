@@ -1,10 +1,11 @@
 package com.github.davidmoten.aws.maven;
 
-import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -38,6 +39,7 @@ final class CloudFormationDeployer {
 
     public void deploy(AwsKeyPair keyPair, String region, final String stackName, final String templateBody,
             Map<String, String> parameters, int intervalSeconds, Proxy proxy) {
+        long startTime = System.currentTimeMillis();
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
         Preconditions.checkArgument(intervalSeconds <= 600, "intervalSeconds must be less than or equal to 600");
 
@@ -112,6 +114,7 @@ final class CloudFormationDeployer {
                     .withParameters(params) //
                     .withCapabilities(Capability.CAPABILITY_IAM) //
                     .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
+            log.info("sent createStack command");
         } else {
             try {
                 cf.updateStack(new UpdateStackRequest() //
@@ -120,6 +123,7 @@ final class CloudFormationDeployer {
                         .withParameters(params) //
                         .withCapabilities(Capability.CAPABILITY_IAM) //
                         .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
+                log.info("sent updateStack command");
             } catch (RuntimeException e) {
                 log.info(e.getMessage());
                 // see https://github.com/hashicorp/terraform/issues/5653
@@ -131,10 +135,12 @@ final class CloudFormationDeployer {
                 }
             }
         }
+        // insert blank line into log
+        log.info("");
         Status result = waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
 
         // write out events
-        displayEvents(stackName, cf);
+        displayEvents(stackName, cf, startTime);
 
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
@@ -142,7 +148,7 @@ final class CloudFormationDeployer {
         }
     }
 
-    private void displayEvents(final String stackName, AmazonCloudFormation cf) {
+    private void displayEvents(final String stackName, AmazonCloudFormation cf, long sinceTime) {
         // list history of application
         log.info("------------------------------");
         log.info("Event history - " + stackName);
@@ -151,15 +157,17 @@ final class CloudFormationDeployer {
         r.getStackEvents() //
                 .stream() //
                 .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp())) //
+                .filter(x -> x.getTimestamp().getTime() >= sinceTime - TimeUnit.MINUTES.toMillis(1)) //
                 .forEach(x -> {
-                    log.info(x.getTimestamp() + " status=" + x.getResourceStatus());
-                    log.info("  type=" + x.getResourceType());
-                    log.info("  reason=" + x.getResourceStatusReason());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddd HH:mm:ss");
+                    log.info(sdf.format(x.getTimestamp()) + " " +  x.getResourceStatus() + " " + x.getResourceType());
                     if (x.getResourceStatusReason() != null) {
-                        log.info("  properties=\n");
-                        log.info(x.getResourceProperties());
+                        log.info("  reason=" + x.getResourceStatusReason());
+                        if (x.getResourceProperties() != null) {
+                            log.info("  properties=\n");
+                            log.info(Util.formatJson(x.getResourceProperties()));
+                        }
                     }
-                    log.info("-----------------------------------------------");
                 });
     }
 

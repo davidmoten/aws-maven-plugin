@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -13,6 +14,7 @@ import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 
 import com.amazonaws.ClientConfiguration;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 final class Util {
 
@@ -53,4 +55,15 @@ final class Util {
         }
         return keys;
     }
+    
+    public static String formatJson(String json) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writerWithDefaultPrettyPrinter() //
+                    .writeValueAsString(mapper.readValue(json, Object.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
