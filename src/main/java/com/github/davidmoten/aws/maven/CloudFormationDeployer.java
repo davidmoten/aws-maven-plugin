@@ -24,7 +24,6 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.ListStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Stack;
@@ -67,14 +66,27 @@ final class CloudFormationDeployer {
 
         deleteFailedCreate(stackName, cf, statusPollingIntervalMs);
 
-        // check if stack exists
-        boolean exists = cf.listStacks().getStackSummaries() //
-                .stream() //
-                .filter(x -> x.getStackName().equals(stackName)) //
-                .sorted((a, b) -> Long.compare(lastChangeTime(a), lastChangeTime(b))) //
-                .reduce((x, y) -> y) // get the last item chronologically
-                .map(x -> !StackStatus.DELETE_COMPLETE.name().equals(x.getStackStatus())) //
-                .orElse(false);
+        boolean exists = !cf.describeStacks( //
+                new DescribeStacksRequest().withStackName(stackName)) //
+                .getStacks() //
+                .isEmpty();
+
+        // // check if stack exists
+        // boolean exists = cf.listStacks().getStackSummaries() //
+        // .stream() //
+        // .map(x -> {
+        // log.info("before " + x.getStackName() + " " + x.getStackStatus());
+        // return x;
+        // }) //
+        // .filter(x -> x.getStackName().equals(stackName)) //
+        // .sorted((a, b) -> Long.compare(lastChangeTime(a), lastChangeTime(b))) //
+        // .map(x -> {
+        // log.info(x.getStackStatus());
+        // return x;
+        // }) //
+        // .reduce((x, y) -> y) // get the last item chronologically
+        // .map(x -> !StackStatus.DELETE_COMPLETE.name().equals(x.getStackStatus())) //
+        // .orElse(false);
 
         if (!exists) {
             cf.createStack(new CreateStackRequest() //
