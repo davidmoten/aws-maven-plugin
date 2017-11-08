@@ -39,7 +39,7 @@ final class S3FileDeployer {
 				.build();
 
 		if (create) {
-			if (!s3.doesBucketExist(bucketName)) {
+			if (!s3.doesBucketExistV2(bucketName)) {
 				log.info("bucket does not exist so creating");
 				s3.createBucket(bucketName);
 				log.info("created bucket " + bucketName);
