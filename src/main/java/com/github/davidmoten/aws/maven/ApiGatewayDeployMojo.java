@@ -28,8 +28,8 @@ public final class ApiGatewayDeployMojo extends AbstractMojo {
     @Parameter(property = "stage")
     private String stage;
 
-    @Parameter(property = "restApiId")
-    private String restApiId;
+    @Parameter(property = "restApiName")
+    private String restApiName;
     
     @Parameter(property = "httpsProxyHost")
     private String httpsProxyHost;
@@ -59,7 +59,7 @@ public final class ApiGatewayDeployMojo extends AbstractMojo {
         ApiGatewayDeployer deployer = new ApiGatewayDeployer(getLog());
         AwsKeyPair keys = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings,
                 decrypter);
-        deployer.deploy(keys, region, restApiId, stage, proxy);
+        deployer.deploy(keys, region, restApiName, stage, proxy);
     }
 
 }
