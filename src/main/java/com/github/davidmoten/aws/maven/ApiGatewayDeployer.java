@@ -15,7 +15,6 @@ import com.amazonaws.services.apigateway.model.GetStageResult;
 import com.amazonaws.services.apigateway.model.MethodSnapshot;
 import com.amazonaws.services.apigateway.model.UpdateDeploymentRequest;
 import com.amazonaws.services.apigateway.model.UpdateDeploymentResult;
-import com.google.common.base.Preconditions;
 
 public class ApiGatewayDeployer {
 
@@ -25,13 +24,7 @@ public class ApiGatewayDeployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, final String apiId, final String stage,
-            int intervalSeconds, Proxy proxy) {
-        long startTime = System.currentTimeMillis();
-        Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
-        Preconditions.checkArgument(intervalSeconds <= 600,
-                "intervalSeconds must be less than or equal to 600");
-
+    public void deploy(AwsKeyPair keyPair, String region, final String apiId, final String stage, Proxy proxy) {
         final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
@@ -41,15 +34,18 @@ public class ApiGatewayDeployer {
                 .withClientConfiguration(cc) //
                 .withRegion(region) //
                 .build();
+        log.info("getting deploymentId for " + apiId + ":" + stage);
         GetStageResult s = ag.getStage(new GetStageRequest() //
                 .withRestApiId(apiId) //
                 .withStageName(stage));
         String deploymentId = s.getDeploymentId();
+        log.info("deploymentId=" + deploymentId);
         UpdateDeploymentResult r = ag.updateDeployment(new UpdateDeploymentRequest() //
                 .withRestApiId(apiId) //
                 .withDeploymentId(deploymentId));
         Map<String, Map<String, MethodSnapshot>> summary = r.getApiSummary();
-        log.info(summary.toString());
+        log.info("updated deployment");
+        log.info("summary=" + summary);
     }
 
 }
