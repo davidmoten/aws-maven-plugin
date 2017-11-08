@@ -66,27 +66,15 @@ final class CloudFormationDeployer {
 
         deleteFailedCreate(stackName, cf, statusPollingIntervalMs);
 
-        boolean exists = !cf.describeStacks( //
-                new DescribeStacksRequest().withStackName(stackName)) //
-                .getStacks() //
-                .isEmpty();
-
-        // // check if stack exists
-        // boolean exists = cf.listStacks().getStackSummaries() //
-        // .stream() //
-        // .map(x -> {
-        // log.info("before " + x.getStackName() + " " + x.getStackStatus());
-        // return x;
-        // }) //
-        // .filter(x -> x.getStackName().equals(stackName)) //
-        // .sorted((a, b) -> Long.compare(lastChangeTime(a), lastChangeTime(b))) //
-        // .map(x -> {
-        // log.info(x.getStackStatus());
-        // return x;
-        // }) //
-        // .reduce((x, y) -> y) // get the last item chronologically
-        // .map(x -> !StackStatus.DELETE_COMPLETE.name().equals(x.getStackStatus())) //
-        // .orElse(false);
+        boolean exists;
+        try {
+            exists = !cf.describeStacks( //
+                    new DescribeStacksRequest().withStackName(stackName)) //
+                    .getStacks() //
+                    .isEmpty();
+        } catch (AmazonCloudFormationException e) {
+            exists = false;
+        }
 
         if (!exists) {
             cf.createStack(new CreateStackRequest() //
