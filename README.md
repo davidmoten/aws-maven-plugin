@@ -9,6 +9,7 @@ aws-maven-plugin
 * Deploy a zipped artifact (zip or jar for instance) to an existing function on AWS Lambda
 * Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
 * Create/Update a stack on CloudFormation
+* Deploy an API Gateway Rest API (CloudFormation does not deploy an api to a stage)
 * Supports java 7+
 * Supports proxy
 
@@ -209,6 +210,39 @@ and call
 
 ```bash
 mvn package aws:deployCf
+```
+
+### Deploy an API Gateway API to a Stage
+
+Use this goal:
+
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>aws-maven-plugin</artifactId>
+    <version>[LATEST_VERSION]</version>
+    <configuration>
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
+        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <region>ap-southeast-2</region>
+        <restApiName>my-gateway</restApiName>
+        <stage>dev</stage>
+        <!-- optional proxy config -->
+        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyPort>8080</httpsProxyPort>
+        <httpsProxyUsername>user</httpsProxyUsername>
+        <httpsProxyPassword>pass</httpsProxyPassword>
+    </configuration>
+</plugin>
+```
+
+and call 
+
+```bash
+mvn package aws:deployRestApi
 ```
 
 Nice and easy! (Let me know if you have any problems!)
