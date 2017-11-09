@@ -214,7 +214,7 @@ mvn package aws:deployCf
 
 ### Deploy an API Gateway API to a Stage
 
-Use this goal:
+Use the `deployRestApi` goal:
 
 ```xml
 <plugin>
