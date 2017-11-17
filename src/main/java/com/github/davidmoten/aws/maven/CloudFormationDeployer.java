@@ -1,9 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +26,6 @@ import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackStatus;
-import com.amazonaws.services.cloudformation.model.StackSummary;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.base.Preconditions;
 
@@ -114,20 +111,6 @@ final class CloudFormationDeployer {
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
             throw new RuntimeException("create/update failed: " + result);
-        }
-    }
-
-    private long lastChangeTime(StackSummary a) {
-        List<Long> list = new ArrayList<>(3);
-        addNonNull(list, a.getCreationTime());
-        addNonNull(list, a.getDeletionTime());
-        addNonNull(list, a.getLastUpdatedTime());
-        return Collections.max(list);
-    }
-
-    private static void addNonNull(List<Long> list, Date d) {
-        if (d != null) {
-            list.add(d.getTime());
         }
     }
 
