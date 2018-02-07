@@ -40,6 +40,9 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
     @Parameter(property = "stackTemplate")
     private File template;
 
+    @Parameter(property = "templateUrl")
+    private String templateUrl;
+
     @Parameter(property = "intervalSeconds", defaultValue="5")
     private int intervalSeconds;
 
@@ -72,11 +75,16 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
         AwsKeyPair keys = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings,
                 decrypter);
         byte[] bytes;
-        try {
-            bytes = Files.readAllBytes(template.toPath());
-        } catch (IOException e) {
-            throw new MojoFailureException(
-                    "could not read template=" + template + ": " + e.getMessage(), e);
+
+        if (templateUrl == null) {
+            try {
+                bytes = Files.readAllBytes(template.toPath());
+            } catch (IOException e) {
+                throw new MojoFailureException(
+                        "could not read template=" + template + ": " + e.getMessage(), e);
+            }
+        } else {
+            bytes = new byte[0];
         }
 
         // Note UTF-16 is possible also if starts with byte-order mark, see yaml
@@ -84,7 +92,7 @@ public final class CloudFormationDeployMojo extends AbstractMojo {
         // complains!
         String templateBody = new String(bytes, StandardCharsets.UTF_8);
         deployer.deploy(keys, region, stackName, templateBody, parameters,
-                intervalSeconds, proxy);
+                intervalSeconds, proxy, templateUrl);
     }
 
 }

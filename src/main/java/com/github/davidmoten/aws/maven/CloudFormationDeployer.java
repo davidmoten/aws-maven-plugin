@@ -38,7 +38,7 @@ final class CloudFormationDeployer {
     }
 
     public void deploy(AwsKeyPair keyPair, String region, final String stackName, final String templateBody,
-            Map<String, String> parameters, int intervalSeconds, Proxy proxy) {
+                       Map<String, String> parameters, int intervalSeconds, Proxy proxy, final String templateUrl) {
         long startTime = System.currentTimeMillis();
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
         Preconditions.checkArgument(intervalSeconds <= 600, "intervalSeconds must be less than or equal to 600");
@@ -72,23 +72,32 @@ final class CloudFormationDeployer {
         } catch (AmazonCloudFormationException e) {
             exists = false;
         }
-
         if (!exists) {
-            cf.createStack(new CreateStackRequest() //
+            CreateStackRequest createStackRequest = new CreateStackRequest() //
                     .withStackName(stackName) //
-                    .withTemplateBody(templateBody) //
                     .withParameters(params) //
                     .withCapabilities(Capability.CAPABILITY_IAM) //
-                    .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
+                    .withCapabilities(Capability.CAPABILITY_NAMED_IAM);
+            if (templateUrl != null) {
+                createStackRequest = createStackRequest.withTemplateURL(templateUrl); //
+            } else {
+                createStackRequest = createStackRequest.withTemplateBody(templateBody); //
+            }
+            cf.createStack(createStackRequest);
             log.info("sent createStack command");
         } else {
             try {
-                cf.updateStack(new UpdateStackRequest() //
+                UpdateStackRequest updateStackRequest = new UpdateStackRequest() //
                         .withStackName(stackName) //
-                        .withTemplateBody(templateBody) //
                         .withParameters(params) //
                         .withCapabilities(Capability.CAPABILITY_IAM) //
-                        .withCapabilities(Capability.CAPABILITY_NAMED_IAM));
+                        .withCapabilities(Capability.CAPABILITY_NAMED_IAM);
+                if (templateUrl != null) {
+                    updateStackRequest = updateStackRequest.withTemplateURL(templateUrl); //
+                } else {
+                    updateStackRequest = updateStackRequest.withTemplateBody(templateBody); //
+                }
+                cf.updateStack(updateStackRequest);
                 log.info("sent updateStack command");
             } catch (RuntimeException e) {
                 log.info(e.getMessage());
