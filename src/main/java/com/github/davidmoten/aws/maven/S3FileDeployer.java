@@ -2,6 +2,7 @@ package com.github.davidmoten.aws.maven;
 
 import java.io.File;
 
+import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
@@ -21,7 +22,7 @@ final class S3FileDeployer {
 	}
 
 	public void deploy(AwsKeyPair keyPair, String region, File file, final String bucketName, final String objectName,
-			Proxy proxy, boolean create) {
+			Proxy proxy, boolean create, String awsKmsKeyId) {
 
 		if (file == null) {
 			throw new RuntimeException("must specify inputDirectory parameter in configuration");
@@ -46,7 +47,12 @@ final class S3FileDeployer {
 			}
 		}
 
-		PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file);
+		PutObjectRequest req;
+		if (awsKmsKeyId != null)
+			req = new PutObjectRequest(bucketName, objectName, file).withSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams(awsKmsKeyId));
+		else
+			req = new PutObjectRequest(bucketName, objectName, file);
+
 		log.info("uploading object to s3:" + bucketName + ":" + objectName + ", " + file.length() + " bytes");
 		s3.putObject(req);
 		log.info("deployed " + file.getName() + " to s3 " + bucketName + ":" + objectName);
