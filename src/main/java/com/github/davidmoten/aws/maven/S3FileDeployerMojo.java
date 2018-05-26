@@ -51,6 +51,9 @@ public final class S3FileDeployerMojo extends AbstractMojo {
     @Parameter(property = "httpsProxyPassword")
     private String httpsProxyPassword;
 
+    @Parameter(property = "awsKmsKeyId")
+    private String awsKmsKeyId;
+
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
@@ -67,7 +70,7 @@ public final class S3FileDeployerMojo extends AbstractMojo {
 
         S3FileDeployer deployer = new S3FileDeployer(getLog());
         AwsKeyPair keyPair = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings, decrypter);
-        deployer.deploy(keyPair, region, file, bucketName, objectName, proxy, create);
+        deployer.deploy(keyPair, region, file, bucketName, objectName, proxy, create, awsKmsKeyId);
     }
 
 }
