@@ -47,11 +47,13 @@ final class S3FileDeployer {
 			}
 		}
 
-		PutObjectRequest req;
-		if (awsKmsKeyId != null)
-			req = new PutObjectRequest(bucketName, objectName, file).withSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams(awsKmsKeyId));
-		else
-			req = new PutObjectRequest(bucketName, objectName, file);
+        final PutObjectRequest req;
+        if (awsKmsKeyId != null) {
+            req = new PutObjectRequest(bucketName, objectName, file)
+                    .withSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams(awsKmsKeyId));
+        } else {
+            req = new PutObjectRequest(bucketName, objectName, file);
+        }
 
 		log.info("uploading object to s3:" + bucketName + ":" + objectName + ", " + file.length() + " bytes");
 		s3.putObject(req);
