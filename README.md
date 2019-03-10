@@ -57,7 +57,7 @@ Add this to the `<plugins>` section of your pom.xml:
         <!-- optional versionLabel -->
         <versionLabel>my-artifact-${maven.build.timestamp}.war</versionLabel>
         <!-- optional proxy config -->
-        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyHost>proxy.me.com</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
         <httpsProxyPassword>pass</httpsProxyPassword>
