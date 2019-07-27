@@ -192,6 +192,10 @@ To create or update a stack in CloudFormation (bulk create/modify resources in A
         <region>ap-southeast-2</region>
         <stackName>myStack</stackName>
         <template>src/main/aws/cloudformation.yaml</template>
+        <!--
+        or use already uploaded s3 artifact
+        <templateUrl>https://bucketName.s3.amazonaws.com/filename.yml</templateUrl>
+        -->
         <parameters>
             <mode>dev</mode>
             <version>6.01</version>
