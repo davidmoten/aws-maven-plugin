@@ -94,6 +94,8 @@ Add this to the `<plugins>` section of your pom.xml:
         <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         <artifact>${project.build.directory}/my-artifact.war</artifact>
         <functionName>myFunction</functionName>
+        <!-- optional functionAlias, if included an alias for the new lambda version is created -->
+        <functionAlias>${project.version}-${maven.build.timestamp}</functionAlias>
         <region>ap-southeast-2</region>
         <!-- optional proxy config -->
         <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
