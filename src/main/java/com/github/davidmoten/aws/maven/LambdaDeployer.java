@@ -52,12 +52,16 @@ class LambdaDeployer {
         log.info("deployed in " + (System.currentTimeMillis() - t) + "ms");
         Optional<String> optionalFunctionAlias = Optional.ofNullable(functionAlias);
         if (optionalFunctionAlias.isPresent()) {
+            // ailas only likes underscores, have to strip out other characters if they are present
+            String sanitisedFunctionalAlias = optionalFunctionAlias.get()
+                    .replaceAll("[-\\.]", "_")
+                    .replaceAll(":", "");
             CreateAliasResult createAliasResult = lambda.createAlias(
                 new CreateAliasRequest()
                     .withFunctionVersion(updateFunctionCodeResult.getVersion())
                     .withFunctionName(functionName)
-                    .withName(optionalFunctionAlias.get()));
-            log.info("created alias=" + optionalFunctionAlias.get() + " to functionName=" + functionName + " for version=" + updateFunctionCodeResult.getVersion());
+                    .withName(sanitisedFunctionalAlias));
+            log.info("created alias=" + sanitisedFunctionalAlias + " to functionName=" + functionName + " for version=" + updateFunctionCodeResult.getVersion());
         }
     }
 
