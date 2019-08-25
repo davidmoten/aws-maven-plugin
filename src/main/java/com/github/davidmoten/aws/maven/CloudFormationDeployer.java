@@ -77,6 +77,7 @@ final class CloudFormationDeployer {
                     .withStackName(stackName) //
                     .withParameters(params) //
                     .withCapabilities(Capability.CAPABILITY_IAM) //
+                    .withCapabilities(Capability.CAPABILITY_AUTO_EXPAND) //
                     .withCapabilities(Capability.CAPABILITY_NAMED_IAM);
             if (templateUrl != null) {
                 createStackRequest = createStackRequest.withTemplateURL(templateUrl); //
@@ -91,6 +92,7 @@ final class CloudFormationDeployer {
                         .withStackName(stackName) //
                         .withParameters(params) //
                         .withCapabilities(Capability.CAPABILITY_IAM) //
+                        .withCapabilities(Capability.CAPABILITY_AUTO_EXPAND) //
                         .withCapabilities(Capability.CAPABILITY_NAMED_IAM);
                 if (templateUrl != null) {
                     updateStackRequest = updateStackRequest.withTemplateURL(templateUrl); //
