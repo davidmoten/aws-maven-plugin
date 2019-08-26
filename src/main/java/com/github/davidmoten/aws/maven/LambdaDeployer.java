@@ -6,9 +6,6 @@ import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.Optional;
 
-import com.amazonaws.services.lambda.model.CreateAliasRequest;
-import com.amazonaws.services.lambda.model.CreateAliasResult;
-import com.amazonaws.services.lambda.model.UpdateFunctionCodeResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 
@@ -17,7 +14,11 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.CreateAliasRequest;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
+import com.amazonaws.services.lambda.model.UpdateFunctionCodeResult;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 class LambdaDeployer {
 
@@ -52,17 +53,25 @@ class LambdaDeployer {
         log.info("deployed in " + (System.currentTimeMillis() - t) + "ms");
         Optional<String> optionalFunctionAlias = Optional.ofNullable(functionAlias);
         if (optionalFunctionAlias.isPresent()) {
-            // ailas only likes underscores, have to strip out other characters if they are present
-            String sanitisedFunctionalAlias = optionalFunctionAlias.get()
-                    .replaceAll("[-\\.]", "_")
-                    .replaceAll(":", "");
-            CreateAliasResult createAliasResult = lambda.createAlias(
-                new CreateAliasRequest()
-                    .withFunctionVersion(updateFunctionCodeResult.getVersion())
-                    .withFunctionName(functionName)
-                    .withName(sanitisedFunctionalAlias));
-            log.info("created alias=" + sanitisedFunctionalAlias + " to functionName=" + functionName + " for version=" + updateFunctionCodeResult.getVersion());
+            // alias only likes underscores, have to strip out other characters if they are present
+            String sanitisedFunctionAlias = sanitizeFunctionAlias(optionalFunctionAlias.get());
+            lambda.createAlias( //
+                new CreateAliasRequest() //
+                    .withFunctionVersion(updateFunctionCodeResult.getVersion()) //
+                    .withFunctionName(functionName) //
+                    .withName(sanitisedFunctionAlias));
+            log.info("created alias=" + sanitisedFunctionAlias + " to functionName=" + functionName + " for version=" + updateFunctionCodeResult.getVersion());
         }
+    }
+
+    @VisibleForTesting
+    static String sanitizeFunctionAlias(String functionAlias) {
+        Preconditions.checkNotNull(functionAlias);
+        return functionAlias //
+                // replace dash or dot with underscore
+                .replaceAll("[-\\.]", "_") //
+                // remove colons
+                .replaceAll(":", "");
     }
 
 }
