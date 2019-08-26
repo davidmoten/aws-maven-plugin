@@ -25,6 +25,9 @@ public final class LambdaDeployMojo extends AbstractMojo {
     @Parameter(property = "functionName")
     private String functionName;
 
+    @Parameter(property = "functionAlias")
+    private String functionAlias;
+
     @Parameter(property = "artifact")
     private String artifact;
 
@@ -59,7 +62,7 @@ public final class LambdaDeployMojo extends AbstractMojo {
         LambdaDeployer deployer = new LambdaDeployer(getLog());
         AwsKeyPair keys = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings,
                 decrypter);
-        deployer.deploy(keys, region, artifact, functionName, proxy);
+        deployer.deploy(keys, region, artifact, functionName, functionAlias, proxy);
     }
 
 }
