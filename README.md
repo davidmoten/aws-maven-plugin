@@ -5,8 +5,8 @@ aws-maven-plugin
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin)<br/>
 <!--[![Dependency Status](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin.svg)](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin)-->
 
-* Deploy a zipped artifact (zip or war for instance) to an existing environment on AWS Elastic Beanstalk
-* Deploy a zipped artifact (zip or jar for instance) to an existing function on AWS Lambda
+* Deploy a zipped artifact (zip or war for instance) to an environment on AWS Elastic Beanstalk
+* Deploy a zipped artifact (zip or jar for instance) to a function on AWS Lambda
 * Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
 * Create/Update a stack on CloudFormation
 * Deploy an API Gateway Rest API (CloudFormation does not deploy an api to a stage)
