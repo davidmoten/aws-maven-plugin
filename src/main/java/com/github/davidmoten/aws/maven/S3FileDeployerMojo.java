@@ -27,15 +27,28 @@ public final class S3FileDeployerMojo extends AbstractMojo {
     @Parameter(property = "region")
     private String region;
 
+    /**
+     * Name of the bucket to which the file will be deployed.
+     */
     @Parameter(property = "bucketName")
     private String bucketName;
 
+    /**
+     * The file that will be deployed to S3.
+     */
     @Parameter(property = "file", required = true)
     private File file;
 
+    /**
+     * The key name of the object in the bucket. The file name will be used by default if the parameter is not
+     * configured.
+     */
     @Parameter(property = "objectName")
     private String objectName;
 
+    /**
+     * Creates a bucket with the given name if it doesn't exist.
+     */
     @Parameter(property = "create", defaultValue = "false")
     private boolean create;
 
@@ -70,6 +83,9 @@ public final class S3FileDeployerMojo extends AbstractMojo {
 
         S3FileDeployer deployer = new S3FileDeployer(getLog());
         AwsKeyPair keyPair = Util.getAwsKeyPair(serverId, awsAccessKey, awsSecretAccessKey, settings, decrypter);
+        if (objectName == null) {
+            objectName = file.getName();
+        }
         deployer.deploy(keyPair, region, file, bucketName, objectName, proxy, create, awsKmsKeyId);
     }
 
