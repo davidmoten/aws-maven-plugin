@@ -29,7 +29,7 @@ To use a `serverId` you'll need xml like this in your `~/.m2/settings.xml`:
 
 ```xml
 <server>
-    <id>amsa.aws</id>
+    <id>mycompany.aws</id>
     <username>AWS_ACCESS_KEY_HERE</username>
     <password>AWS_SECRET_ACCESS_KEY_HERE</password>
 </server>
@@ -98,7 +98,7 @@ Add this to the `<plugins>` section of your pom.xml:
         <functionAlias>${project.version}-${maven.build.timestamp}</functionAlias>
         <region>ap-southeast-2</region>
         <!-- optional proxy config -->
-        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
         <httpsProxyPassword>pass</httpsProxyPassword>
@@ -160,7 +160,7 @@ Add this to the `<plugins>` section of your pom.xml:
         <bucketName>the_bucket</bucketName>
         <outputBasePath></outputBasePath>
         <!-- optional proxy config -->
-        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
         <httpsProxyPassword>pass</httpsProxyPassword>
@@ -204,7 +204,7 @@ To create or update a stack in CloudFormation (bulk create/modify resources in A
         </parameters>
         <intervalSeconds>2</intervalSeconds>
         <!-- optional proxy config -->
-        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
         <httpsProxyPassword>pass</httpsProxyPassword>
@@ -237,7 +237,7 @@ Use the `deployRestApi` goal:
         <restApiName>my-gateway</restApiName>
         <stage>dev</stage>
         <!-- optional proxy config -->
-        <httpsProxyHost>proxy.amsa.gov.au</httpsProxyHost>
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
         <httpsProxyUsername>user</httpsProxyUsername>
         <httpsProxyPassword>pass</httpsProxyPassword>
