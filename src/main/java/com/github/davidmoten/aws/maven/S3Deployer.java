@@ -10,10 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.maven.plugin.logging.Log;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AccessControlList;
 import com.amazonaws.services.s3.model.GroupGrantee;
 import com.amazonaws.services.s3.model.Permission;
@@ -22,19 +19,14 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 final class S3Deployer {
 
     private final Log log;
+    private final AmazonS3 s3Client;
 
-    S3Deployer(Log log) {
+    S3Deployer(Log log, AmazonS3 s3Client) {
         this.log = log;
+        this.s3Client = s3Client;
     }
 
-    public void deploy(AWSCredentialsProvider credentials, String region, String inputDirectory,
-                       String bucketName, String outputBasePath, Proxy proxy) {
-
-        ClientConfiguration cc = Util.createConfiguration(proxy);
-
-        final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials).withClientConfiguration(cc)
-                .withRegion(region).build();
-
+    public void deploy(String inputDirectory, String bucketName, String outputBasePath) {
         if (inputDirectory == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
         }
@@ -57,7 +49,7 @@ final class S3Deployer {
                     log.info("uploading " + file.toFile() + " to " + bucketName + ":" + objectName);
                     PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file.toFile()) //
                             .withAccessControlList(acl);
-                    s3.putObject(req);
+                    s3Client.putObject(req);
                     return FileVisitResult.CONTINUE;
                 }
             });
