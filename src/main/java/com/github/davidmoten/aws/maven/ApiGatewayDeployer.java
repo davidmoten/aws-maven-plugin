@@ -7,8 +7,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.apigateway.AmazonApiGateway;
 import com.amazonaws.services.apigateway.AmazonApiGatewayClientBuilder;
 import com.amazonaws.services.apigateway.model.CreateDeploymentRequest;
@@ -26,10 +24,8 @@ final class ApiGatewayDeployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, final String restApiName, final String stage, Proxy proxy) {
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
-
+    public void deploy(AWSCredentialsProvider credentials, String region, String restApiName, String stage,
+                       Proxy proxy) {
         ClientConfiguration cc = Util.createConfiguration(proxy);
 
         AmazonApiGateway ag = AmazonApiGatewayClientBuilder.standard().withCredentials(credentials) //

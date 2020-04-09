@@ -1,7 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
@@ -21,9 +20,9 @@ public final class S3DeployerMojo extends AbstractAwsMojo {
     private String outputBasePath;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) throws MojoExecutionException, MojoFailureException {
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
         S3Deployer deployer = new S3Deployer(getLog());
-        deployer.deploy(keyPair, region,  inputDirectory, bucketName, outputBasePath, proxy);
+        deployer.deploy(credentials, region,  inputDirectory, bucketName, outputBasePath, proxy);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
@@ -13,9 +14,9 @@ public final class ApiGatewayDeployMojo extends AbstractAwsMojo {
     private String restApiName;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) {
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
         ApiGatewayDeployer deployer = new ApiGatewayDeployer(getLog());
-        deployer.deploy(keyPair, region, restApiName, stage, proxy);
+        deployer.deploy(credentials, region, restApiName, stage, proxy);
     }
 
 }

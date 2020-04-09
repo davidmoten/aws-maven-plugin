@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -29,7 +30,7 @@ public final class CloudFormationDeployMojo extends AbstractAwsMojo {
     private int intervalSeconds;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) throws MojoFailureException {
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) throws MojoFailureException {
         byte[] bytes;
 
         if (templateUrl == null) {
@@ -49,7 +50,7 @@ public final class CloudFormationDeployMojo extends AbstractAwsMojo {
         String templateBody = new String(bytes, StandardCharsets.UTF_8);
 
         CloudFormationDeployer deployer = new CloudFormationDeployer(getLog());
-        deployer.deploy(keyPair, region, stackName, templateBody, parameters,
+        deployer.deploy(credentials, region, stackName, templateBody, parameters,
                 intervalSeconds, proxy, templateUrl);
     }
 

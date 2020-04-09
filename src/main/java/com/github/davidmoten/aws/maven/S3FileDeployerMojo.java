@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
@@ -40,12 +41,12 @@ public final class S3FileDeployerMojo extends AbstractAwsMojo {
     private String awsKmsKeyId;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) {
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
         S3FileDeployer deployer = new S3FileDeployer(getLog());
         if (objectName == null) {
             objectName = file.getName();
         }
-        deployer.deploy(keyPair, region, file, bucketName, objectName, proxy, create, awsKmsKeyId);
+        deployer.deploy(credentials, region, file, bucketName, objectName, proxy, create, awsKmsKeyId);
     }
 
 }

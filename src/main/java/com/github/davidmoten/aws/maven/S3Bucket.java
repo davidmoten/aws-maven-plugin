@@ -4,8 +4,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
@@ -17,11 +15,7 @@ final class S3Bucket {
 		this.log = log;
 	}
 
-	void create(AwsKeyPair keyPair, String region, final String bucketName, Proxy proxy) {
-
-		final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-				new BasicAWSCredentials(keyPair.key, keyPair.secret));
-
+	void create(AWSCredentialsProvider credentials, String region, final String bucketName, Proxy proxy) {
 		ClientConfiguration cc = Util.createConfiguration(proxy);
 
 		final AmazonS3 s3 = AmazonS3ClientBuilder.standard() //

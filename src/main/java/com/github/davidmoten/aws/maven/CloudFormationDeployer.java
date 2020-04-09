@@ -11,8 +11,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
@@ -37,14 +35,11 @@ final class CloudFormationDeployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, final String stackName, final String templateBody,
-                       Map<String, String> parameters, int intervalSeconds, Proxy proxy, final String templateUrl) {
+    public void deploy(AWSCredentialsProvider credentials, String region, String stackName, String templateBody,
+                       Map<String, String> parameters, int intervalSeconds, Proxy proxy, String templateUrl) {
         long startTime = System.currentTimeMillis();
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
         Preconditions.checkArgument(intervalSeconds <= 600, "intervalSeconds must be less than or equal to 600");
-
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
         ClientConfiguration cc = Util.createConfiguration(proxy);
 

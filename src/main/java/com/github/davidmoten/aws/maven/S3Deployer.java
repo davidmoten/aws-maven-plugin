@@ -12,8 +12,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AccessControlList;
@@ -29,11 +27,8 @@ final class S3Deployer {
         this.log = log;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, String inputDirectory, final String bucketName,
-            final String outputBasePath, Proxy proxy) {
-
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
+    public void deploy(AWSCredentialsProvider credentials, String region, String inputDirectory,
+                       String bucketName, String outputBasePath, Proxy proxy) {
 
         ClientConfiguration cc = Util.createConfiguration(proxy);
 

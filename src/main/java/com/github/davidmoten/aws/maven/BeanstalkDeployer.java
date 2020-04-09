@@ -7,8 +7,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder;
 import com.amazonaws.services.elasticbeanstalk.model.CreateApplicationVersionRequest;
@@ -25,11 +23,8 @@ final class BeanstalkDeployer {
         this.log = log;
     }
 
-    void deploy(File artifact, AwsKeyPair keyPair, String region, String applicationName, String environmentName,
-            String versionLabel, Proxy proxy) {
-
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
+    void deploy(AWSCredentialsProvider credentials, String region, File artifact, String applicationName, String environmentName,
+                String versionLabel, Proxy proxy) {
 
         ClientConfiguration cc = Util.createConfiguration(proxy);
 

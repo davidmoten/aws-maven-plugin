@@ -2,8 +2,6 @@ package com.github.davidmoten.aws.maven;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -17,9 +15,7 @@ public class AwsPropertyMojo extends AbstractAwsMojo {
     private MavenProject project;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) {
-        AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
         ClientConfiguration cc = Util.createConfiguration(proxy);
 
         AmazonIdentityManagement iam = AmazonIdentityManagementClientBuilder //

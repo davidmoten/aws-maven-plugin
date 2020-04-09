@@ -7,8 +7,6 @@ import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -21,15 +19,12 @@ final class S3FileDeployer {
 		this.log = log;
 	}
 
-	public void deploy(AwsKeyPair keyPair, String region, File file, final String bucketName, final String objectName,
-			Proxy proxy, boolean create, String awsKmsKeyId) {
+	public void deploy(AWSCredentialsProvider credentials, String region, File file, final String bucketName,
+					   final String objectName, Proxy proxy, boolean create, String awsKmsKeyId) {
 
 		if (file == null) {
 			throw new RuntimeException("must specify inputDirectory parameter in configuration");
 		}
-
-		final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-				new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
 		ClientConfiguration cc = Util.createConfiguration(proxy);
 

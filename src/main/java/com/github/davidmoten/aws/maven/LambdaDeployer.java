@@ -10,8 +10,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.CreateAliasRequest;
@@ -28,10 +26,9 @@ class LambdaDeployer {
         this.log = log;
     }
 
-    void deploy(AwsKeyPair keyPair, String region, String zipFilename, String functionName, String functionAlias, Proxy proxy) {
+    void deploy(AWSCredentialsProvider credentials, String region, String zipFilename, String functionName,
+                String functionAlias, Proxy proxy) {
         long t = System.currentTimeMillis();
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
 
         AWSLambda lambda = AWSLambdaClientBuilder.standard().withCredentials(credentials)
                 .withClientConfiguration(Util.createConfiguration(proxy)).withRegion(region).build();

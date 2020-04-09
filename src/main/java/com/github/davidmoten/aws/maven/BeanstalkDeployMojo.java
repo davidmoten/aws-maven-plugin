@@ -1,5 +1,6 @@
 package com.github.davidmoten.aws.maven;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -26,13 +27,13 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
     private MavenProject project;
 
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) {
+    protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
         if (versionLabel == null) {
             versionLabel = createVersionLabel(applicationName, new Date(), project.getVersion());
         }
 
         BeanstalkDeployer deployer = new BeanstalkDeployer(getLog());
-        deployer.deploy(artifact, keyPair, region, applicationName, environmentName, versionLabel, proxy);
+        deployer.deploy(credentials, region, artifact, applicationName, environmentName, versionLabel, proxy);
     }
 
     private static String createVersionLabel(String applicationName, Date date, String version) {

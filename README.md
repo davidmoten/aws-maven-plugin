@@ -20,21 +20,32 @@ Status: *released to Maven Central*
 ## How to use
 
 ### Authentication
-To authenticate your activities against AWS you can 
-* specify the accessKey and secretAccessKey in the configuration of the plugin, 
-**or** 
-* use a `serverId` defined in `~/.m2/settings.xml`.
 
-To use a `serverId` you'll need xml like this in your `~/.m2/settings.xml`:
-
-```xml
-<server>
-    <id>mycompany.aws</id>
-    <username>AWS_ACCESS_KEY_HERE</username>
-    <password>AWS_SECRET_ACCESS_KEY_HERE</password>
-</server>
-```
-Only the password field (secret access key) in the `server` element can be encrypted (as per `mvn -ep`).
+You must provide credentials in order to make requests to AWS services. You can either specify the
+credentials in the plugin configuration or rely on the default credential provider chain, which 
+attemps to find the credentials in different sources. The followin order is used to find the AWS 
+credentials:
+1.  If `serverId` is specified, the plugin checks the Maven server authentication profile. In that 
+    case your `~/.m2/settings.xml` has to include AWS access keys. In the `servers` tag, add a 
+    child `server` tag with an `id` with the `serverId` you specified earlier in the plugin 
+    configuration. Use `username` and `password` to define your AWS access and AWS secret access 
+    keys respectively:
+    ```xml
+    <server>
+        <id>mycompany.aws</id>
+        <username>AWS_ACCESS_KEY_HERE</username>
+        <password>AWS_SECRET_ACCESS_KEY_HERE</password>
+    </server>
+    ```
+    Only the password field (secret access key) in the `server` element can be encrypted (as per `mvn -ep`).
+2.  Plugin configuration – `awsAccessKey` and `awsSecretAccessKey` parameters.
+3.  Default AWS credential provider chain:
+    1. Environment variables – `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+    2. Java system properties – `aws.accessKeyId` and `aws.secretKey`.
+    3. The default credential profiles file, that is usually located at `~/.aws/credentials`
+    4. Amazon ECS container credentials.
+    5. Instance profile credentials.
+    6. Web Identity Token credentials from the environment or container. 
 
 ### Deploy to Beanstalk
 Add this to the `<plugins>` section of your pom.xml:
@@ -45,15 +56,19 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
-        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
+        <region>ap-southeast-2</region>
+        
         <artifact>${project.build.directory}/my-artifact.war</artifact>
         <applicationName>my-application-name</applicationName>
         <environmentName>my-environment-name</environmentName>
-        <region>ap-southeast-2</region>
         <!-- optional versionLabel -->
         <versionLabel>my-artifact-${maven.build.timestamp}.war</versionLabel>
         <!-- optional proxy config -->
@@ -87,16 +102,20 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
-        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
+        <region>ap-southeast-2</region>
+        
         <artifact>${project.build.directory}/my-artifact.war</artifact>
         <functionName>myFunction</functionName>
         <!-- optional functionAlias, if included an alias for the new lambda version is created -->
         <functionAlias>${project.version}-${maven.build.timestamp}</functionAlias>
-        <region>ap-southeast-2</region>
         <!-- optional proxy config -->
         <httpsProxyHost>proxy.mycompany</httpsProxyHost>
         <httpsProxyPort>8080</httpsProxyPort>
@@ -150,12 +169,16 @@ Add this to the `<plugins>` section of your pom.xml:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
-        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
+        
         <inputDirectory>src/main/webapp</inputDirectory>
         <bucketName>the_bucket</bucketName>
         <outputBasePath></outputBasePath>
@@ -186,12 +209,16 @@ To create or update a stack in CloudFormation (bulk create/modify resources in A
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
-        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
+        
         <stackName>myStack</stackName>
         <template>src/main/aws/cloudformation.yaml</template>
         <!--
@@ -228,12 +255,16 @@ Use the `deployRestApi` goal:
     <artifactId>aws-maven-plugin</artifactId>
     <version>[LATEST_VERSION]</version>
     <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>${env.AWS_ACCESS_KEY}</awsAccessKey>
-        <awsSecretAccessKey>${env.AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
+        
         <restApiName>my-gateway</restApiName>
         <stage>dev</stage>
         <!-- optional proxy config -->
