@@ -1,5 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -11,7 +13,7 @@ import java.nio.file.Files;
 import java.util.Map;
 
 @Mojo(name = "deployCf")
-public final class CloudFormationDeployMojo extends AbstractAwsMojo {
+public final class CloudFormationDeployMojo extends AbstractDeployAwsMojo<AmazonCloudFormationClientBuilder, AmazonCloudFormation> {
 
     @Parameter(property = "stackName")
     private String stackName;
@@ -28,8 +30,12 @@ public final class CloudFormationDeployMojo extends AbstractAwsMojo {
     @Parameter(property = "intervalSeconds", defaultValue="5")
     private int intervalSeconds;
 
+    public CloudFormationDeployMojo() {
+        super(AmazonCloudFormationClientBuilder.standard());
+    }
+
     @Override
-    protected void execute(AwsKeyPair keyPair, String region, Proxy proxy) throws MojoFailureException {
+    protected void execute(AmazonCloudFormation cloudFormationClient) throws MojoFailureException {
         byte[] bytes;
 
         if (templateUrl == null) {
@@ -48,9 +54,8 @@ public final class CloudFormationDeployMojo extends AbstractAwsMojo {
         // complains!
         String templateBody = new String(bytes, StandardCharsets.UTF_8);
 
-        CloudFormationDeployer deployer = new CloudFormationDeployer(getLog());
-        deployer.deploy(keyPair, region, stackName, templateBody, parameters,
-                intervalSeconds, proxy, templateUrl);
+        CloudFormationDeployer deployer = new CloudFormationDeployer(getLog(), cloudFormationClient);
+        deployer.deploy(stackName, templateBody, parameters, intervalSeconds, templateUrl);
     }
 
 }

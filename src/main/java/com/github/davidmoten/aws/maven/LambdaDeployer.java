@@ -9,11 +9,7 @@ import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.CreateAliasRequest;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeResult;
@@ -23,18 +19,15 @@ import com.google.common.base.Preconditions;
 class LambdaDeployer {
 
     private final Log log;
+    private final AWSLambda lambdaClient;
 
-    LambdaDeployer(Log log) {
+    LambdaDeployer(Log log, AWSLambda lambdaClient) {
         this.log = log;
+        this.lambdaClient = lambdaClient;
     }
 
-    void deploy(AwsKeyPair keyPair, String region, String zipFilename, String functionName, String functionAlias, Proxy proxy) {
+    void deploy(String zipFilename, String functionName, String functionAlias) {
         long t = System.currentTimeMillis();
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
-
-        AWSLambda lambda = AWSLambdaClientBuilder.standard().withCredentials(credentials)
-                .withClientConfiguration(Util.createConfiguration(proxy)).withRegion(region).build();
 
         byte[] bytes;
         try {
@@ -45,7 +38,7 @@ class LambdaDeployer {
         DecimalFormat df = new DecimalFormat("0.000");
         log.info("deploying " + zipFilename + ", length=" + df.format(bytes.length / 1024.0 / 1024.0)
                 + "MB, to functionName=" + functionName);
-        UpdateFunctionCodeResult updateFunctionCodeResult = lambda.updateFunctionCode( //
+        UpdateFunctionCodeResult updateFunctionCodeResult = lambdaClient.updateFunctionCode( //
                 new UpdateFunctionCodeRequest() //
                         .withFunctionName(functionName) //
                         .withPublish(true) //
@@ -55,7 +48,7 @@ class LambdaDeployer {
         if (optionalFunctionAlias.isPresent()) {
             // alias only likes underscores, have to strip out other characters if they are present
             String sanitisedFunctionAlias = sanitizeFunctionAlias(optionalFunctionAlias.get());
-            lambda.createAlias( //
+            lambdaClient.createAlias( //
                 new CreateAliasRequest() //
                     .withFunctionVersion(updateFunctionCodeResult.getVersion()) //
                     .withFunctionName(functionName) //

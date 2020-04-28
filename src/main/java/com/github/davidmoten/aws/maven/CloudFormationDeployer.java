@@ -9,12 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.logging.Log;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.Capability;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
@@ -32,40 +27,30 @@ import com.google.common.base.Preconditions;
 final class CloudFormationDeployer {
 
     private final Log log;
+    private final AmazonCloudFormation cloudFormationClient;
 
-    CloudFormationDeployer(Log log) {
+    CloudFormationDeployer(Log log, AmazonCloudFormation cloudFormationClient) {
         this.log = log;
+        this.cloudFormationClient = cloudFormationClient;
     }
 
-    public void deploy(AwsKeyPair keyPair, String region, final String stackName, final String templateBody,
-                       Map<String, String> parameters, int intervalSeconds, Proxy proxy, final String templateUrl) {
+    public void deploy(String stackName, String templateBody,
+                       Map<String, String> parameters, int intervalSeconds, String templateUrl) {
         long startTime = System.currentTimeMillis();
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");
         Preconditions.checkArgument(intervalSeconds <= 600, "intervalSeconds must be less than or equal to 600");
 
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
-
-        ClientConfiguration cc = Util.createConfiguration(proxy);
-
-        AmazonCloudFormation cf = AmazonCloudFormationClientBuilder //
-                .standard() //
-                .withCredentials(credentials) //
-                .withClientConfiguration(cc) //
-                .withRegion(region) //
-                .build();
-
         final List<Parameter> params = buildParameters(parameters);
 
-        displayStatusHistory(stackName, cf);
+        displayStatusHistory(stackName);
 
         int statusPollingIntervalMs = intervalSeconds * 1000;
 
-        deleteFailedCreate(stackName, cf, statusPollingIntervalMs);
+        deleteFailedCreate(stackName, statusPollingIntervalMs);
 
         boolean exists;
         try {
-            exists = !cf.describeStacks( //
+            exists = !cloudFormationClient.describeStacks( //
                     new DescribeStacksRequest().withStackName(stackName)) //
                     .getStacks() //
                     .isEmpty();
@@ -84,7 +69,7 @@ final class CloudFormationDeployer {
             } else {
                 createStackRequest = createStackRequest.withTemplateBody(templateBody); //
             }
-            cf.createStack(createStackRequest);
+            cloudFormationClient.createStack(createStackRequest);
             log.info("sent createStack command");
         } else {
             try {
@@ -99,7 +84,7 @@ final class CloudFormationDeployer {
                 } else {
                     updateStackRequest = updateStackRequest.withTemplateBody(templateBody); //
                 }
-                cf.updateStack(updateStackRequest);
+                cloudFormationClient.updateStack(updateStackRequest);
                 log.info("sent updateStack command");
             } catch (RuntimeException e) {
                 log.info(e.getMessage());
@@ -114,10 +99,10 @@ final class CloudFormationDeployer {
         }
         // insert blank line into log
         log.info("");
-        Status result = waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
+        Status result = waitForCompletion(stackName, statusPollingIntervalMs, log);
 
         // write out recent events
-        displayEvents(stackName, cf, startTime);
+        displayEvents(stackName, startTime);
 
         if (!result.value.equals(StackStatus.CREATE_COMPLETE.toString()) //
                 && !result.value.equals(StackStatus.UPDATE_COMPLETE.toString())) {
@@ -125,11 +110,11 @@ final class CloudFormationDeployer {
         }
     }
 
-    private void deleteFailedCreate(final String stackName, AmazonCloudFormation cf, int statusPollingIntervalMs) {
+    private void deleteFailedCreate(final String stackName, int statusPollingIntervalMs) {
         {
             // delete an application in ROLLBACK_COMPLETE status
 
-            ListStacksResult r = cf.listStacks();
+            ListStacksResult r = cloudFormationClient.listStacks();
             r.getStackSummaries() //
                     .stream() //
                     .filter(x -> x.getStackName().equals(stackName)) //
@@ -137,8 +122,8 @@ final class CloudFormationDeployer {
                     .filter(x -> StackStatus.ROLLBACK_COMPLETE.toString().equals(x.getStackStatus())) //
                     .forEach(x -> {
                         log.info("Deleting stack with status " + x.getStackStatus()); //
-                        cf.deleteStack(new DeleteStackRequest().withStackName(stackName));
-                        waitForCompletion(cf, stackName, statusPollingIntervalMs, log);
+                        cloudFormationClient.deleteStack(new DeleteStackRequest().withStackName(stackName));
+                        waitForCompletion(stackName, statusPollingIntervalMs, log);
                     });
 
         }
@@ -158,13 +143,13 @@ final class CloudFormationDeployer {
         return params;
     }
 
-    private void displayStatusHistory(final String stackName, AmazonCloudFormation cf) {
+    private void displayStatusHistory(final String stackName) {
         {
             // list history of application
             log.info("------------------------------");
             log.info("Stack history - " + stackName);
             log.info("------------------------------");
-            ListStacksResult r = cf.listStacks();
+            ListStacksResult r = cloudFormationClient.listStacks();
             r.getStackSummaries() //
                     .stream() //
                     .filter(x -> x.getStackName().equals(stackName)) //
@@ -179,12 +164,12 @@ final class CloudFormationDeployer {
         }
     }
 
-    private void displayEvents(final String stackName, AmazonCloudFormation cf, long sinceTime) {
+    private void displayEvents(final String stackName, long sinceTime) {
         // list history of application
         log.info("------------------------------");
         log.info("Event history - " + stackName);
         log.info("------------------------------");
-        DescribeStackEventsResult r = cf.describeStackEvents(new DescribeStackEventsRequest().withStackName(stackName));
+        DescribeStackEventsResult r = cloudFormationClient.describeStackEvents(new DescribeStackEventsRequest().withStackName(stackName));
         r.getStackEvents() //
                 .stream() //
                 .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp())) //
@@ -219,7 +204,7 @@ final class CloudFormationDeployer {
     }
 
     // Wait for a stack to complete transition
-    private static Status waitForCompletion(AmazonCloudFormation cf, String stackName, int intervalMs, Log log) {
+    private Status waitForCompletion(String stackName, int intervalMs, Log log) {
 
         DescribeStacksRequest describeRequest = new DescribeStacksRequest().withStackName(stackName);
         String stackStatus = "Unknown";
@@ -231,7 +216,7 @@ final class CloudFormationDeployer {
         while (true) {
             List<Stack> stacks;
             try {
-                stacks = cf.describeStacks(describeRequest).getStacks();
+                stacks = cloudFormationClient.describeStacks(describeRequest).getStacks();
             } catch (AmazonCloudFormationException e) {
                 log.warn(e.getMessage());
                 stacks = Collections.emptyList();

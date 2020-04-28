@@ -1,67 +1,52 @@
 package com.github.davidmoten.aws.maven;
 
-import java.io.File;
-import java.util.Date;
-
-import org.apache.maven.plugin.logging.Log;
-
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
-import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder;
 import com.amazonaws.services.elasticbeanstalk.model.CreateApplicationVersionRequest;
 import com.amazonaws.services.elasticbeanstalk.model.S3Location;
 import com.amazonaws.services.elasticbeanstalk.model.UpdateEnvironmentRequest;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.apache.maven.plugin.logging.Log;
+
+import java.io.File;
+import java.util.Date;
 
 final class BeanstalkDeployer {
 
     private final Log log;
+    private final AWSElasticBeanstalk beanstalkClient;
+    private final AmazonS3 s3Client;
 
-    BeanstalkDeployer(Log log) {
+    BeanstalkDeployer(Log log, AWSElasticBeanstalk beanstalkClient, AmazonS3 s3Client) {
         this.log = log;
+        this.beanstalkClient = beanstalkClient;
+        this.s3Client = s3Client;
     }
 
-    void deploy(File artifact, AwsKeyPair keyPair, String region, String applicationName, String environmentName,
-            String versionLabel, Proxy proxy) {
+    void deploy(File artifact, String applicationName, String environmentName, String versionLabel) {
 
-        final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(keyPair.key, keyPair.secret));
-
-        ClientConfiguration cc = Util.createConfiguration(proxy);
-
-        AWSElasticBeanstalk eb = AWSElasticBeanstalkClientBuilder.standard().withCredentials(credentials)
-                .withClientConfiguration(cc).withRegion(region).build();
-
-        String bucketName = getS3BucketName(eb);
+        String bucketName = getS3BucketName();
 
         String dateTime = Util.formatDateTime(new Date());
 
         String objectName = artifact.getName() + "_" + dateTime;
 
-        uploadArtifact(artifact, credentials, region, cc, bucketName, objectName);
+        uploadArtifact(artifact, bucketName, objectName);
 
-        createApplicationVersion(applicationName, eb, bucketName, objectName, versionLabel);
+        createApplicationVersion(applicationName, beanstalkClient, bucketName, objectName, versionLabel);
 
-        updateEnvironment(applicationName, environmentName, eb, versionLabel);
+        updateEnvironment(applicationName, environmentName, beanstalkClient, versionLabel);
     }
 
-    private String getS3BucketName(AWSElasticBeanstalk eb) {
+    private String getS3BucketName() {
         log.info("getting s3 bucket name to deploy artifact to");
-        String bucketName = eb.createStorageLocation().getS3Bucket();
+        String bucketName = beanstalkClient.createStorageLocation().getS3Bucket();
         log.info("s3Bucket=" + bucketName);
         return bucketName;
     }
 
-    private void uploadArtifact(File artifact, final AWSCredentialsProvider credentials, final String region,
-            ClientConfiguration cc, String bucketName, String objectName) {
-        AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials).withClientConfiguration(cc)
-                .withRegion(region).build();
+    private void uploadArtifact(File artifact, String bucketName, String objectName) {
         log.info("uploading " + artifact + " to " + bucketName + ":" + objectName);
-        s3.putObject(bucketName, objectName, artifact);
+        s3Client.putObject(bucketName, objectName, artifact);
     }
 
     private void createApplicationVersion(String applicationName, AWSElasticBeanstalk eb, String bucketName,
