@@ -26,7 +26,7 @@ final class S3Deployer {
         this.s3Client = s3Client;
     }
 
-    public void deploy(String inputDirectory, String bucketName, String outputBasePath) {
+    public void deploy(String inputDirectory, String bucketName, String outputBasePath, boolean publicRead) {
         if (inputDirectory == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
         }
@@ -37,8 +37,6 @@ final class S3Deployer {
             Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    AccessControlList acl = new AccessControlList();
-                    acl.grantPermission(GroupGrantee.AllUsers, Permission.Read);
                     String relativePath = root.relativize(file.toAbsolutePath()).toString();
                     String objectName;
                     if (outputBasePath != null) {
@@ -47,8 +45,12 @@ final class S3Deployer {
                         objectName = relativePath;
                     }
                     log.info("uploading " + file.toFile() + " to " + bucketName + ":" + objectName);
-                    PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file.toFile()) //
-                            .withAccessControlList(acl);
+                    PutObjectRequest req = new PutObjectRequest(bucketName, objectName, file.toFile()); //
+                    if (publicRead) {
+                        AccessControlList acl = new AccessControlList();
+                        acl.grantPermission(GroupGrantee.AllUsers, Permission.Read);
+                        req = req.withAccessControlList(acl);
+                    }
                     s3Client.putObject(req);
                     return FileVisitResult.CONTINUE;
                 }
