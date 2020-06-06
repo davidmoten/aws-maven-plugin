@@ -158,7 +158,7 @@ mvn package aws:deployLambda
 ```
 ### Deploy directory to S3
 * deploys a directory to a path in an S3 bucket
-* all uploaded files are given public read permissions
+* all uploaded files are given public read permissions (can configure this off)
 * designed for upload of public websites
 
 Add this to the `<plugins>` section of your pom.xml:
