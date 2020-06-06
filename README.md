@@ -180,6 +180,11 @@ Add this to the `<plugins>` section of your pom.xml:
         <region>ap-southeast-2</region>
         
         <inputDirectory>src/main/webapp</inputDirectory>
+
+        <!-- if false uses bucket default ACL -->
+        <!-- default is true -->
+        <publicRead>false</publicRead>
+
         <bucketName>the_bucket</bucketName>
         <outputBasePath></outputBasePath>
         <!-- optional proxy config -->
