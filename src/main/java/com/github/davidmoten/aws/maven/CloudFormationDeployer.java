@@ -1,6 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,22 @@ final class CloudFormationDeployer {
         this.log = log;
         this.cloudFormationClient = cloudFormationClient;
     }
+
+    public void destroy(String stackName, int intervalSeconds) {
+		cloudFormationClient.deleteStack(
+				new DeleteStackRequest().withStackName(stackName)
+		);
+
+		int statusPollingIntervalMs = intervalSeconds * 1000;
+
+		// insert blank line into log
+		log.info("");
+		Status result = waitForCompletion(stackName, statusPollingIntervalMs, log);
+
+		if (!Arrays.asList(StackStatus.DELETE_COMPLETE.toString(), "NO_SUCH_STACK").contains(result.value)) {
+			throw new RuntimeException("delete stack failed: " + result);
+		}
+	}
 
     public void deploy(String stackName, String templateBody,
                        Map<String, String> parameters, int intervalSeconds, String templateUrl) {
@@ -210,7 +227,7 @@ final class CloudFormationDeployer {
         String stackStatus = "Unknown";
         String stackReason = "";
 
-        log.info("waiting for action on  " + stackName);
+        log.info("waiting for action on " + stackName);
         long t = System.currentTimeMillis();
 
         while (true) {
@@ -218,7 +235,6 @@ final class CloudFormationDeployer {
             try {
                 stacks = cloudFormationClient.describeStacks(describeRequest).getStacks();
             } catch (AmazonCloudFormationException e) {
-                log.warn(e.getMessage());
                 stacks = Collections.emptyList();
             }
             if (stacks.isEmpty()) {
