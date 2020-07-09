@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.maven.plugin.logging.Log;
-
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.Capability;
@@ -24,6 +22,7 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.base.Preconditions;
+import org.apache.maven.plugin.logging.Log;
 
 final class CloudFormationDeployer {
 
@@ -36,20 +35,20 @@ final class CloudFormationDeployer {
     }
 
     public void destroy(String stackName, int intervalSeconds) {
-		cloudFormationClient.deleteStack(
-				new DeleteStackRequest().withStackName(stackName)
-		);
+        cloudFormationClient.deleteStack(
+                new DeleteStackRequest().withStackName(stackName)
+        );
 
-		int statusPollingIntervalMs = intervalSeconds * 1000;
+        int statusPollingIntervalMs = intervalSeconds * 1000;
 
-		// insert blank line into log
-		log.info("");
-		Status result = waitForCompletion(stackName, statusPollingIntervalMs, log);
+        // insert blank line into log
+        log.info("");
+        Status result = waitForCompletion(stackName, statusPollingIntervalMs, log);
 
-		if (!Arrays.asList(StackStatus.DELETE_COMPLETE.toString(), "NO_SUCH_STACK").contains(result.value)) {
-			throw new RuntimeException("delete stack failed: " + result);
-		}
-	}
+        if (!Arrays.asList(StackStatus.DELETE_COMPLETE.toString(), "NO_SUCH_STACK").contains(result.value)) {
+            throw new RuntimeException("delete stack failed: " + result);
+        }
+    }
 
     public void deploy(String stackName, String templateBody,
                        Map<String, String> parameters, int intervalSeconds, String templateUrl) {
