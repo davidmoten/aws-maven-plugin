@@ -235,7 +235,7 @@ final class CloudFormationDeployer {
             try {
                 stacks = cloudFormationClient.describeStacks(describeRequest).getStacks();
             } catch (AmazonCloudFormationException e) {
-				log.info(e.getMessage());
+                log.info(e.getMessage());
                 stacks = Collections.emptyList();
             }
             if (stacks.isEmpty()) {
