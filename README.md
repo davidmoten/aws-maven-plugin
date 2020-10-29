@@ -195,6 +195,7 @@ Add this to the `<plugins>` section of your pom.xml:
     </configuration>
 </plugin>
 ```
+
 Notes:
 * If you don't access AWS via an https proxy then leave those configuration settings out.
 
@@ -202,6 +203,56 @@ Notes:
 export AWS_ACCESS_KEY=<your_key>
 export AWS_SECRET_ACCESS_KEY=<your_secret>
 mvn package aws:deployS3
+```
+
+### Empty an S3 bucket
+* Empties an S3 bucket for future deploys to s3
+* Configurable to have a list of excluded regular expressions to ignore certain s3 objects
+
+Add this to the `<plugins>` section of your pom.xml:
+
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>aws-maven-plugin</artifactId>
+    <version>[LATEST_VERSION]</version>
+    <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
+        <region>ap-southeast-2</region>
+        
+        <bucketName>the_bucket</bucketName>
+
+        <!-- optional: java regex to exclude certain s3 objects that match any of these patterns -->
+        <excludes>
+            <exclude>\\\\*.jpg</exclude>
+            <exclude>config/*</exclude>
+        </excludes>
+
+        <!-- optional: will not actually delete objects in s3 -->
+        <!-- Used for testing purposes -->
+        <!-- default is false -->
+        <dryRun>false</dryRun>
+
+        <!-- optional proxy config -->
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
+        <httpsProxyPort>8080</httpsProxyPort>
+        <httpsProxyUsername>user</httpsProxyUsername>
+        <httpsProxyPassword>pass</httpsProxyPassword>
+    </configuration>
+</plugin>
+```
+
+and call 
+
+```bash
+mvn package aws:emptyS3
 ```
 
 ### Create/Update CloudfFormation stack
