@@ -79,9 +79,11 @@ final class S3EmptyBucket {
 
             /* S3 OBJECT DELETION */
 
-            if (!isDryRun) {
+            if (bucketObjectKeys.isEmpty()) {
+                log.info("No objects to remove from bucket " + bucketName + "!");
+            } else {
+                if (!isDryRun) {
 
-                if (!bucketObjectKeys.isEmpty()) {
                     // Delete the objects.
                     DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
                         .withKeys(bucketObjectKeys)
@@ -92,13 +94,10 @@ final class S3EmptyBucket {
                     int successfulDeletes = delObjRes.getDeletedObjects().size();
                     log.info(successfulDeletes + " objects successfully deleted.");
                 } else {
-                    log.info("No objects to remove from bucket " + bucketName + "!");
-                }
-            } else {
-
-                log.info("[Dry Run] Deleting the following objects:");
-                for (KeyVersion kv: bucketObjectKeys) {
-                    log.info(String.format("[Dry Run] - deleting %s/%s", bucketName, kv.getKey()));
+                    log.info("[Dry Run] Deleting the following objects:");
+                    for (KeyVersion kv: bucketObjectKeys) {
+                        log.info(String.format("[Dry Run] - will delete %s/%s", bucketName, kv.getKey()));
+                    }   
                 }
             }
 
