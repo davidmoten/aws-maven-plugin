@@ -18,6 +18,9 @@ public final class S3EmptyBucketMojo extends AbstractDeployAwsMojo<AmazonS3Clien
     @Parameter(property = "excludes")
     private List<String> excludes;
 
+    @Parameter(property = "maxObjects", defaultValue = "900")
+    private int maxObjects;
+
     @Parameter(property = "dryRun", defaultValue = "false")
     private boolean isDryRun;
 
@@ -28,6 +31,6 @@ public final class S3EmptyBucketMojo extends AbstractDeployAwsMojo<AmazonS3Clien
     @Override
     protected void execute(AmazonS3 s3Client) {
         S3EmptyBucket emptyBucket = new S3EmptyBucket(getLog(), s3Client);
-        emptyBucket.empty(bucketName, excludes, isDryRun);
+        emptyBucket.empty(bucketName, excludes, isDryRun, maxObjects);
     }
 }

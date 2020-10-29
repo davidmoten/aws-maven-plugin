@@ -229,6 +229,10 @@ Add this to the `<plugins>` section of your pom.xml:
         
         <bucketName>the_bucket</bucketName>
 
+        <!-- The maximum number of objects you want to fetch from s3 at a time -->
+        <!-- Max is 1000. Default is 900 -->
+        <maxObjects>60<maxObjects>
+
         <!-- optional: java regex to exclude certain s3 objects that match any of these patterns -->
         <excludes>
             <exclude>\\\\*.jpg</exclude>

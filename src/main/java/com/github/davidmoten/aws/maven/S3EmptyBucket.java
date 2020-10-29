@@ -28,7 +28,7 @@ final class S3EmptyBucket {
         this.s3Client = s3Client;
     }
 
-    public void empty(String bucketName, List<String> excludes, boolean isDryRun) {
+    public void empty(String bucketName, List<String> excludes, boolean isDryRun, int maxKeys) {
         
 
         /* 
@@ -51,7 +51,7 @@ final class S3EmptyBucket {
             // Request 30 objects at a time from the bucket
             ListObjectsV2Request req = new ListObjectsV2Request()
                     .withBucketName(bucketName)
-                    .withMaxKeys(30);
+                    .withMaxKeys(maxKeys);
 
             ListObjectsV2Result result;
 
