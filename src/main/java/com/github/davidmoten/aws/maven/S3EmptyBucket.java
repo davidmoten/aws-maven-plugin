@@ -75,20 +75,25 @@ final class S3EmptyBucket {
 
             } while (result.isTruncated());
             
-            log.info(String.format("Fetched %d objects (excluding %d) from bucket %s. ", bucketObjectKeys.size(), excludedObjectCount, bucketName));
+            log.info(String.format("Found %d objects (excluding %d) from bucket %s. ", bucketObjectKeys.size(), excludedObjectCount, bucketName));
 
             /* S3 OBJECT DELETION */
 
             if (!isDryRun) {
-                // Delete the objects.
-                DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
+
+                if (!bucketObjectKeys.isEmpty()) {
+                    // Delete the objects.
+                    DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
                         .withKeys(bucketObjectKeys)
                         .withQuiet(false);
-    
-                // Verify that the objects were deleted successfully.
-                DeleteObjectsResult delObjRes = s3Client.deleteObjects(multiObjectDeleteRequest);
-                int successfulDeletes = delObjRes.getDeletedObjects().size();
-                log.info(successfulDeletes + " objects successfully deleted.");
+
+                    // Verify that the objects were deleted successfully.
+                    DeleteObjectsResult delObjRes = s3Client.deleteObjects(multiObjectDeleteRequest);
+                    int successfulDeletes = delObjRes.getDeletedObjects().size();
+                    log.info(successfulDeletes + " objects successfully deleted.");
+                } else {
+                    log.info("No objects to remove from bucket " + bucketName + "!");
+                }
             } else {
 
                 log.info("[Dry Run] Deleting the following objects:");
