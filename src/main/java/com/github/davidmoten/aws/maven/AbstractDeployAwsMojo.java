@@ -12,11 +12,11 @@ import org.apache.maven.plugin.MojoFailureException;
  * @param <Client> the type of the client used to access AWS services.
  * @param <Builder> the type of the builder used to build the client.
  */
-public abstract class AbstractDeployAwsMojo<Builder extends AwsSyncClientBuilder<Builder, Client>, Client> extends AbstractAwsMojo {
+abstract class AbstractDeployAwsMojo<Builder extends AwsSyncClientBuilder<Builder, Client>, Client> extends AbstractAwsMojo {
 
     private final Builder builder;
 
-    public AbstractDeployAwsMojo(Builder clientBuilder) {
+    AbstractDeployAwsMojo(Builder clientBuilder) {
         this.builder = clientBuilder;
     }
 

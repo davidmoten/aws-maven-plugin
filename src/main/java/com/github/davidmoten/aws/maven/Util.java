@@ -29,7 +29,7 @@ final class Util {
         return cc;
     }
     
-    public static String formatJson(String json) {
+    static String formatJson(String json) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writerWithDefaultPrettyPrinter() //

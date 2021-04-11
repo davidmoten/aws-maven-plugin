@@ -26,7 +26,7 @@ final class S3Deployer {
         this.s3Client = s3Client;
     }
 
-    public void deploy(String inputDirectory, String bucketName, String outputBasePath, boolean publicRead) {
+    void deploy(String inputDirectory, String bucketName, String outputBasePath, boolean publicRead) {
         if (inputDirectory == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
         }

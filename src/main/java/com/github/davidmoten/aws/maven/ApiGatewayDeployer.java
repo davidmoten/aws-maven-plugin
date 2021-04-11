@@ -23,7 +23,7 @@ final class ApiGatewayDeployer {
         this.apiGatewayClient = apiGatewayClient;
     }
 
-    public void deploy(String restApiName, String stage) {
+    void deploy(String restApiName, String stage) {
         GetRestApisResult apis = apiGatewayClient.getRestApis(new GetRestApisRequest().withLimit(10000));
         Optional<RestApi> api = apis.getItems().stream().filter(item -> item.getName().equals(restApiName)).findFirst();
         RestApi a = api.orElseThrow(() -> new RuntimeException("no rest api found with name='" + restApiName + "'"));

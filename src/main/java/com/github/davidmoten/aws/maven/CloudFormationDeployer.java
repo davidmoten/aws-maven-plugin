@@ -34,7 +34,7 @@ final class CloudFormationDeployer {
         this.cloudFormationClient = cloudFormationClient;
     }
 
-    public void destroy(String stackName, int intervalSeconds) {
+    void destroy(String stackName, int intervalSeconds) {
         cloudFormationClient.deleteStack(
                 new DeleteStackRequest().withStackName(stackName)
         );
@@ -50,7 +50,7 @@ final class CloudFormationDeployer {
         }
     }
 
-    public void deploy(String stackName, String templateBody,
+    void deploy(String stackName, String templateBody,
                        Map<String, String> parameters, int intervalSeconds, String templateUrl) {
         long startTime = System.currentTimeMillis();
         Preconditions.checkArgument(intervalSeconds > 0, "intervalSeconds must be greater than 0");

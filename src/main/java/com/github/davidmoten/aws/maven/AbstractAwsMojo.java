@@ -17,7 +17,7 @@ import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 
 import java.util.Optional;
 
-public abstract class AbstractAwsMojo extends AbstractMojo {
+abstract class AbstractAwsMojo extends AbstractMojo {
 
     private static final String REGION_NOT_FOUND_ERROR_MESSAGE = "The region must be specified either in the plugin " +
             "configuration (region), environment variable (AWS_REGION), system property (aws.region), AWS shared " +

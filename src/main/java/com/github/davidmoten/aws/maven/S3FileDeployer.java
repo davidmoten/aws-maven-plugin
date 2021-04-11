@@ -18,7 +18,7 @@ final class S3FileDeployer {
 		this.s3Client = s3Client;
 	}
 
-	public void deploy(File file, final String bucketName, final String objectName, boolean create, String awsKmsKeyId) {
+	void deploy(File file, final String bucketName, final String objectName, boolean create, String awsKmsKeyId) {
 
 		if (file == null) {
 			throw new RuntimeException("must specify inputDirectory parameter in configuration");
