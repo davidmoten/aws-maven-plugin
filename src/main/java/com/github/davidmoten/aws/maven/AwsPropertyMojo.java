@@ -7,7 +7,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "property")
-public class AwsPropertyMojo extends AbstractDeployAwsMojo<AmazonIdentityManagementClientBuilder, AmazonIdentityManagement> {
+public class AwsPropertyMojo extends
+        AbstractDeployAwsMojo<AmazonIdentityManagementClientBuilder, AmazonIdentityManagement> {
 
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
@@ -20,8 +21,10 @@ public class AwsPropertyMojo extends AbstractDeployAwsMojo<AmazonIdentityManagem
     protected void execute(AmazonIdentityManagement identityManagementClient) {
         String accountId = identityManagementClient.getUser().getUser().getUserId();
         project.getProperties().setProperty("aws.account.id", accountId);
+        project.getProperties().setProperty("aws.account.id.lowercase", accountId.toLowerCase());
         getLog().info("The following properties have been set for the project");
         getLog().info("aws.account.id=" + accountId);
+        getLog().info("aws.account.id.lowercase=" + accountId.toLowerCase());
     }
 
 }
