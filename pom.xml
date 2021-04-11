@@ -12,7 +12,7 @@
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <aws.sdk.version>1.11.754</aws.sdk.version>
+        <aws.sdk.version>1.11.996</aws.sdk.version>
         <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
     </properties>
 
@@ -109,14 +109,14 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.8</version>
         </dependency>
 
         <!-- test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
 
