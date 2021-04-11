@@ -1,9 +1,10 @@
 package com.github.davidmoten.aws.maven;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Mojo(name = "deployS3")
 public final class S3DeployerMojo extends AbstractDeployAwsMojo<AmazonS3ClientBuilder, AmazonS3> {

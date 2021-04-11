@@ -1,9 +1,10 @@
 package com.github.davidmoten.aws.maven;
 
-import com.amazonaws.services.apigateway.AmazonApiGateway;
-import com.amazonaws.services.apigateway.AmazonApiGatewayClientBuilder;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import com.amazonaws.services.apigateway.AmazonApiGateway;
+import com.amazonaws.services.apigateway.AmazonApiGatewayClientBuilder;
 
 @Mojo(name = "deployRestApi")
 public final class ApiGatewayDeployMojo extends AbstractDeployAwsMojo<AmazonApiGatewayClientBuilder, AmazonApiGateway> {

@@ -1,14 +1,15 @@
 package com.github.davidmoten.aws.maven;
 
+import java.io.File;
+import java.util.Date;
+
+import org.apache.maven.plugin.logging.Log;
+
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.model.CreateApplicationVersionRequest;
 import com.amazonaws.services.elasticbeanstalk.model.S3Location;
 import com.amazonaws.services.elasticbeanstalk.model.UpdateEnvironmentRequest;
 import com.amazonaws.services.s3.AmazonS3;
-import org.apache.maven.plugin.logging.Log;
-
-import java.io.File;
-import java.util.Date;
 
 final class BeanstalkDeployer {
 

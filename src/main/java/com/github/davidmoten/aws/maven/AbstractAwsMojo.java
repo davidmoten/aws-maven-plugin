@@ -1,9 +1,7 @@
 package com.github.davidmoten.aws.maven;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.*;
-import com.amazonaws.regions.AwsRegionProvider;
-import com.amazonaws.regions.DefaultAwsRegionProviderChain;
+import java.util.Optional;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -15,7 +13,14 @@ import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
 import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 
-import java.util.Optional;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.regions.AwsRegionProvider;
+import com.amazonaws.regions.DefaultAwsRegionProviderChain;
 
 abstract class AbstractAwsMojo extends AbstractMojo {
 
