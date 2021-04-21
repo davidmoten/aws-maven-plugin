@@ -9,9 +9,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 @Mojo(name = "deployS3")
 public final class S3DeployerMojo extends AbstractDeployAwsMojo<AmazonS3ClientBuilder, AmazonS3> {
 
-    @Parameter(property = "region")
-    private String region;
-
     @Parameter(property = "bucketName")
     private String bucketName;
 
