@@ -26,12 +26,16 @@ final class S3Deployer {
         this.s3Client = s3Client;
     }
 
-    void deploy(String inputDirectory, String bucketName, String outputBasePath, boolean publicRead) {
+    void deploy(String inputDirectory, String bucketName, String outputBasePath, boolean publicRead, boolean create) {
         if (inputDirectory == null) {
             throw new RuntimeException("must specify inputDirectory parameter in configuration");
         }
 
         final Path root = new File(inputDirectory).toPath().toAbsolutePath();
+        
+        if (!s3Client.doesBucketExistV2(bucketName)) {
+            s3Client.createBucket(bucketName);
+        }
 
         try {
             Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
