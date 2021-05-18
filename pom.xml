@@ -8,7 +8,7 @@
 
     <artifactId>aws-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>0.2.29</version>
+    <version>0.2.30-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -53,7 +53,7 @@
         <connection>${scm.url}</connection>
         <developerConnection>${scm.url}</developerConnection>
         <url>${scm.url}</url>
-        <tag>0.2.29</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
