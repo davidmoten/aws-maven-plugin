@@ -14,6 +14,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <aws.sdk.version>1.12.142</aws.sdk.version>
         <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <licenses>
@@ -138,16 +139,27 @@
                 <version>3.5</version>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-descriptor</id>
+                        <goals>
+                            <goal>attach-descriptor</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
-            
+
+        </plugins>
+    </build>
+    <reporting>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.1.1</version>
             </plugin>
         </plugins>
-    </build>
+    </reporting>
 </project>
