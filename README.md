@@ -1,7 +1,7 @@
 aws-maven-plugin
 -----------------
 
-<a href="https://travis-ci.org/davidmoten/aws-maven-plugin"><img src="https://travis-ci.org/davidmoten/aws-maven-plugin.svg"/></a><br/>
+<a href="https://github.com/davidmoten/aws-maven-plugin/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/aws-maven-plugin/actions/workflows/ci.yml/badge.svg"/></a><br/>
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/aws-maven-plugin)<br/>
 <!--[![Dependency Status](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin.svg)](https://gemnasium.com/com.github.davidmoten/aws-maven-plugin)-->
 
