@@ -60,8 +60,8 @@ Add this to the `<plugins>` section of your pom.xml:
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
-        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        <awsAccessKey>${env.YOUR_AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.YOUR_AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         
         <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
@@ -106,8 +106,8 @@ Add this to the `<plugins>` section of your pom.xml:
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
-        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        <awsAccessKey>${env.YOUR_AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.YOUR_AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         
         <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
@@ -173,8 +173,8 @@ Add this to the `<plugins>` section of your pom.xml:
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
-        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        <awsAccessKey>${env.YOUR_AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.YOUR_AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         
         <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
@@ -218,8 +218,8 @@ To create or update a stack in CloudFormation (bulk create/modify resources in A
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
-        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        <awsAccessKey>${env.YOUR_AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.YOUR_AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         
         <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
@@ -264,8 +264,8 @@ Use the `deployRestApi` goal:
         <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
         <serverId>aws</serverId>
         <!-- if you omit serverId then put explicit keys here as below -->
-        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
-        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        <awsAccessKey>${env.YOUR_AWS_ACCESS_KEY}</awsAccessKey>
+        <awsSecretAccessKey>${env.YOUR_AWS_SECRET_ACCESS_KEY}</awsSecretAccessKey>
         
         <!-- The default region provider chain is used if the region is omitted -->
         <region>ap-southeast-2</region>
