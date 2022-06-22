@@ -12,7 +12,7 @@
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <aws.sdk.version>1.12.142</aws.sdk.version>
+        <aws.sdk.version>1.12.245</aws.sdk.version>
         <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -87,6 +87,11 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-elasticbeanstalk</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-ec2</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
         <dependency>

@@ -10,6 +10,7 @@ aws-maven-plugin
 * Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
 * Create/Update a stack on CloudFormation
 * Deploy an API Gateway Rest API (CloudFormation does not deploy an api to a stage)
+* Remove instance security group rules pertaining to particular ports on a Beanstalk deployment (exists because of known inadequacies in cloudformation and default security group creation)
 * Supports java 7+
 * Supports proxy
 
@@ -286,5 +287,61 @@ and call
 ```bash
 mvn package aws:deployRestApi
 ```
+
+### Remove instance security group rules for particular ports on a Beanstalk deployment
+
+Use the `removePorts` goal:
+
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>aws-maven-plugin</artifactId>
+    <version>[LATEST_VERSION]</version>
+    <configuration>
+        <!-- Optional authentication configuration. The default credential provider chain is used if the configuration is omitted -->
+        <!-- if you have serverId then exclude awsAccessKey and awsSecretAccessKey parameters -->
+        <serverId>aws</serverId>
+        <!-- if you omit serverId then put explicit keys here as below -->
+        <awsAccessKey>YOUR_AWS_ACCESS_KEY</awsAccessKey>
+        <awsSecretAccessKey>YOUR_AWS_SECRET_ACCESS_KEY</awsSecretAccessKey>
+        
+        <!-- The default region provider chain is used if the region is omitted -->
+        <region>ap-southeast-2</region>
+
+        <removePorts>
+          <removePort>80</removePort>
+        </removePorts>
+                
+        <!-- optional proxy config -->
+        <httpsProxyHost>proxy.mycompany</httpsProxyHost>
+        <httpsProxyPort>8080</httpsProxyPort>
+        <httpsProxyUsername>user</httpsProxyUsername>
+        <httpsProxyPassword>pass</httpsProxyPassword>
+    </configuration>
+</plugin>
+```
+
+and call 
+
+```bash
+mvn package aws:removePorts
+```
+
+Output from a sample run:
+```
+[INFO] getting instance ids for environment blah-blah
+[INFO] getting security group ids for instance ids [i-017071d415b837a6f]
+[INFO] getting security group rules for security group ids [sg-081ae8c0d524d1a99]
+[INFO] revoking security group rules {sg-081ae8c0d524d1a99=[sgr-0eb6bfef7cb762f86]}
+[INFO] revoked=true for groupId=sg-081ae8c0d524d1a99, ruleIds=[sgr-0eb6bfef7cb762f86]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.357 s
+[INFO] Finished at: 2022-06-22T15:59:59+10:00
+[INFO] ------------------------------------------------------------------------
+
+```
+
 
 Nice and easy! (Let me know if you have any problems!)
