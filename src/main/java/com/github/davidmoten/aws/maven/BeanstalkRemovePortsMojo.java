@@ -70,6 +70,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .collect(Collectors.toList());
             if (instanceIds.isEmpty() ) {
                 getLog().info("no instances found");
+                return;
             }
             getLog().info("getting security group ids for instance ids " + instanceIds);
             List<String> securityGroupIds = ec2
@@ -80,6 +81,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .collect(Collectors.toList());
             if (securityGroupIds.isEmpty()) {
                 getLog().info("no security groups found");
+                return;
             }
             getLog().info("getting security group rules for security group ids " + securityGroupIds);
             Filter filter = new Filter();
@@ -95,6 +97,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
 
             if (securityGroupRuleIds.isEmpty()) {
                 getLog().info("no security group rules found");
+                return;
             }
             getLog().info("removing security group rules " + securityGroupRuleIds);
             RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
