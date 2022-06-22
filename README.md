@@ -10,7 +10,7 @@ aws-maven-plugin
 * Deploy a directory to an S3 bucket giving all users read permissions (designed for public S3-hosted websites)
 * Create/Update a stack on CloudFormation
 * Deploy an API Gateway Rest API (CloudFormation does not deploy an api to a stage)
-* Remove security group rules pertaining to particular ports on a Beanstalk deployment (exists because of known inadequacies in cloudformation and default security group creation)
+* Remove instance security group rules pertaining to particular ports on a Beanstalk deployment (exists because of known inadequacies in cloudformation and default security group creation)
 * Supports java 7+
 * Supports proxy
 
@@ -288,7 +288,7 @@ and call
 mvn package aws:deployRestApi
 ```
 
-### Remove security group rules for particular ports on a Beanstalk deployment
+### Remove instance security group rules for particular ports on a Beanstalk deployment
 
 Use the `removePorts` goal:
 
