@@ -1,15 +1,12 @@
 package com.github.davidmoten.aws.maven;
 
-import java.io.File;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -23,11 +20,9 @@ import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressResult;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder;
 import com.amazonaws.services.elasticbeanstalk.model.DescribeEnvironmentResourcesRequest;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
-@Mojo(name = "deploy")
-public final class BeanstalkDeployMojo extends AbstractAwsMojo {
+@Mojo(name = "removePorts")
+public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
 
     @Parameter(property = "applicationName")
     private String applicationName;
@@ -35,23 +30,12 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
     @Parameter(property = "environmentName")
     private String environmentName;
 
-    @Parameter(property = "artifact")
-    private File artifact;
-
-    @Parameter(property = "versionLabel")
-    private String versionLabel;
-
-    @Parameter(defaultValue = "${project}", required = true)
-    private MavenProject project;
-
     @Parameter(property = "removePorts")
     private List<String> portsToRemoveValues;
 
     @Override
     protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
-        if (versionLabel == null) {
-            versionLabel = createVersionLabel(applicationName, new Date(), project.getVersion());
-        }
+        
         ClientConfiguration clientConfiguration = Util.createConfiguration(proxy);
         AWSElasticBeanstalk beanstalk = AWSElasticBeanstalkClientBuilder //
                 .standard() //
@@ -65,14 +49,6 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
                 .withCredentials(credentials) //
                 .withClientConfiguration(clientConfiguration) //
                 .build();
-        AmazonS3 s3 = AmazonS3ClientBuilder //
-                .standard() //
-                .withRegion(region) //
-                .withCredentials(credentials)
-                .withClientConfiguration(clientConfiguration) //
-                .build();
-        BeanstalkDeployer deployer = new BeanstalkDeployer(getLog(), beanstalk, s3);
-        deployer.deploy(artifact, applicationName, environmentName, versionLabel);
 
         // removal of ports logic exists because AWS Beanstalk has lousy support for
         // removing particular ports from cloudformation deployments. In particular
@@ -118,11 +94,6 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
                     new RevokeSecurityGroupIngressRequest().withSecurityGroupRuleIds(securityGroupRuleIds));
             getLog().info("returned " + result.getReturn());
         }
-    }
-
-    private static String createVersionLabel(String applicationName, Date date, String version) {
-        // construct version label using application name and dateTime
-        return applicationName + "_" + version + "_" + Util.formatDateTime(date);
     }
 
 }
