@@ -19,6 +19,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupRulesRequest;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest;
+import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressResult;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClientBuilder;
 import com.amazonaws.services.elasticbeanstalk.model.DescribeEnvironmentResourcesRequest;
@@ -43,7 +44,7 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
-    @Parameter(property = "portsToRemove")
+    @Parameter(property = "removePorts")
     private List<String> portsToRemoveValues;
 
     @Override
@@ -61,6 +62,10 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
         BeanstalkDeployer deployer = new BeanstalkDeployer(getLog(), beanstalk, s3);
         deployer.deploy(artifact, applicationName, environmentName, versionLabel);
 
+        // removal of ports logic exists because AWS Beanstalk has lousy support for
+        // removing particular ports from cloudformation deployments. In particular
+        // port 80 from Tomcat image single instance deployments is left open to
+        // anywhere.
         Set<Integer> portsToRemove = portsToRemoveValues == null ? Collections.emptySet()
                 : portsToRemoveValues.stream().map(x -> Integer.parseInt(x)).collect(Collectors.toSet());
 
@@ -97,8 +102,9 @@ public final class BeanstalkDeployMojo extends AbstractAwsMojo {
                     .collect(Collectors.toList());
 
             getLog().info("removing security group rules " + securityGroupRuleIds);
-            ec2.revokeSecurityGroupIngress(
+            RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
                     new RevokeSecurityGroupIngressRequest().withSecurityGroupRuleIds(securityGroupRuleIds));
+            getLog().info("returned " + result.getReturn());
         }
     }
 
