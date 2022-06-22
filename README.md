@@ -327,5 +327,21 @@ and call
 mvn package aws:removePorts
 ```
 
+Output from a sample run:
+```
+[INFO] getting instance ids for environment blah-blah
+[INFO] getting security group ids for instance ids [i-017071d415b837a6f]
+[INFO] getting security group rules for security group ids [sg-081ae8c0d524d1a99]
+[INFO] removing security group rules {sg-081ae8c0d524d1a99=[sgr-0eb6bfef7cb762f86]}
+[INFO] revoked=true for groupId=sg-081ae8c0d524d1a99, ruleIds=[sgr-0eb6bfef7cb762f86]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.357 s
+[INFO] Finished at: 2022-06-22T15:59:59+10:00
+[INFO] ------------------------------------------------------------------------
+
+```
+
 
 Nice and easy! (Let me know if you have any problems!)

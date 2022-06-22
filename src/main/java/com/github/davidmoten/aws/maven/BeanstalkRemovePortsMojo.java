@@ -116,7 +116,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
             securityGroupRules.forEach((groupId, ruleIds) -> {
                 RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
                         new RevokeSecurityGroupIngressRequest().withGroupId(groupId).withSecurityGroupRuleIds(ruleIds));
-                getLog().info("returned " + result.getReturn() + " for groupId=" + groupId + ", ruleIds=" + ruleIds);
+                getLog().info("revoked=" + result.getReturn() + " for groupId=" + groupId + ", ruleIds=" + ruleIds);
             });
         }
     }
