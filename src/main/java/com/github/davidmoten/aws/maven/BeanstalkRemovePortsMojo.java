@@ -30,8 +30,8 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
     @Parameter(property = "environmentName")
     private String environmentName;
 
-    @Parameter(property = "removePorts")
-    private List<String> portsToRemoveValues;
+    @Parameter(name = "removePorts")
+    private List<String> removePorts;
 
     @Override
     protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
@@ -54,8 +54,8 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
         // removing particular ports from cloudformation deployments. In particular
         // port 80 from Tomcat image single instance deployments is left open to
         // anywhere.
-        Set<Integer> portsToRemove = portsToRemoveValues == null ? Collections.emptySet()
-                : portsToRemoveValues.stream().map(x -> Integer.parseInt(x)).collect(Collectors.toSet());
+        Set<Integer> portsToRemove = removePorts == null ? Collections.emptySet()
+                : removePorts.stream().map(x -> Integer.parseInt(x)).collect(Collectors.toSet());
 
         if (portsToRemove != null && !portsToRemove.isEmpty()) {
 
@@ -68,7 +68,9 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .stream() //
                     .map(x -> x.getId()) //
                     .collect(Collectors.toList());
-
+            if (instanceIds.isEmpty() ) {
+                getLog().info("no instances found");
+            }
             getLog().info("getting security group ids for instance ids " + instanceIds);
             List<String> securityGroupIds = ec2
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds)) //
@@ -76,7 +78,9 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .stream() //
                     .flatMap(y -> y.getGroups().stream().map(z -> z.getGroupId())) //
                     .collect(Collectors.toList());
-
+            if (securityGroupIds.isEmpty()) {
+                getLog().info("no security groups found");
+            }
             getLog().info("getting security group rules for security group ids " + securityGroupIds);
             Filter filter = new Filter();
             filter.setName("group-id");
@@ -89,6 +93,9 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .map(x -> x.getSecurityGroupRuleId()) //
                     .collect(Collectors.toList());
 
+            if (securityGroupRuleIds.isEmpty()) {
+                getLog().info("no security group rules found");
+            }
             getLog().info("removing security group rules " + securityGroupRuleIds);
             RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
                     new RevokeSecurityGroupIngressRequest().withSecurityGroupRuleIds(securityGroupRuleIds));
