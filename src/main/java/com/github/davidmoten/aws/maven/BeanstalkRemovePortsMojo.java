@@ -1,7 +1,10 @@
 package com.github.davidmoten.aws.maven;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -80,8 +83,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                             .getInstances() //
                             .stream() //
                             .flatMap(z -> z.getNetworkInterfaces().stream()) //
-                            .flatMap(z -> z.getGroups().stream())
-                            .map(z -> z.getGroupId())) //
+                            .flatMap(z -> z.getGroups().stream()).map(z -> z.getGroupId())) //
                     .collect(Collectors.toList());
             if (securityGroupIds.isEmpty()) {
                 getLog().info("no security groups found");
@@ -91,22 +93,31 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
             Filter filter = new Filter();
             filter.setName("group-id");
             filter.setValues(securityGroupIds);
-            List<String> securityGroupRuleIds = ec2
-                    .describeSecurityGroupRules(new DescribeSecurityGroupRulesRequest().withFilters(filter)) //
+            Map<String, List<String>> securityGroupRules = new HashMap<>();
+            ec2.describeSecurityGroupRules(
+                    new DescribeSecurityGroupRulesRequest().withFilters(filter).withMaxResults(1000)) //
                     .getSecurityGroupRules() //
                     .stream() //
                     .filter(x -> portsToRemove.contains(x.getToPort())) //
-                    .map(x -> x.getSecurityGroupRuleId()) //
-                    .collect(Collectors.toList());
+                    .forEach(x -> {
+                        List<String> list = securityGroupRules.get(x.getGroupId());
+                        if (list == null) {
+                            list = new ArrayList<>();
+                            securityGroupRules.put(x.getGroupId(), list);
+                        }
+                        list.add(x.getSecurityGroupRuleId());
+                    });
 
-            if (securityGroupRuleIds.isEmpty()) {
+            if (securityGroupRules.isEmpty()) {
                 getLog().info("no security group rules found");
                 return;
             }
-            getLog().info("removing security group rules " + securityGroupRuleIds);
-            RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
-                    new RevokeSecurityGroupIngressRequest().withSecurityGroupRuleIds(securityGroupRuleIds));
-            getLog().info("returned " + result.getReturn());
+            getLog().info("removing security group rules " + securityGroupRules);
+            securityGroupRules.forEach((groupId, ruleIds) -> {
+                RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
+                        new RevokeSecurityGroupIngressRequest().withGroupId(groupId).withSecurityGroupRuleIds(ruleIds));
+                getLog().info("returned " + result.getReturn() + "for groupId=" + groupId + ", ruleIds=" + ruleIds);
+            });
         }
     }
 
