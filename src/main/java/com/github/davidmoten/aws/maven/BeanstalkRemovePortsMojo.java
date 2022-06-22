@@ -112,7 +112,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                 getLog().info("no security group rules found");
                 return;
             }
-            getLog().info("removing security group rules " + securityGroupRules);
+            getLog().info("revoking security group rules " + securityGroupRules);
             securityGroupRules.forEach((groupId, ruleIds) -> {
                 RevokeSecurityGroupIngressResult result = ec2.revokeSecurityGroupIngress(
                         new RevokeSecurityGroupIngressRequest().withGroupId(groupId).withSecurityGroupRuleIds(ruleIds));

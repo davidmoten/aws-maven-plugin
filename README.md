@@ -332,7 +332,7 @@ Output from a sample run:
 [INFO] getting instance ids for environment blah-blah
 [INFO] getting security group ids for instance ids [i-017071d415b837a6f]
 [INFO] getting security group rules for security group ids [sg-081ae8c0d524d1a99]
-[INFO] removing security group rules {sg-081ae8c0d524d1a99=[sgr-0eb6bfef7cb762f86]}
+[INFO] revoking security group rules {sg-081ae8c0d524d1a99=[sgr-0eb6bfef7cb762f86]}
 [INFO] revoked=true for groupId=sg-081ae8c0d524d1a99, ruleIds=[sgr-0eb6bfef7cb762f86]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
