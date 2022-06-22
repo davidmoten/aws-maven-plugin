@@ -35,12 +35,11 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
 
     @Override
     protected void execute(AWSCredentialsProvider credentials, String region, Proxy proxy) {
-        
+
         ClientConfiguration clientConfiguration = Util.createConfiguration(proxy);
         AWSElasticBeanstalk beanstalk = AWSElasticBeanstalkClientBuilder //
                 .standard() //
-                .withRegion(region)
-                .withCredentials(credentials) //
+                .withRegion(region).withCredentials(credentials) //
                 .withClientConfiguration(clientConfiguration) //
                 .build();
         AmazonEC2 ec2 = AmazonEC2ClientBuilder //
@@ -68,7 +67,7 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .stream() //
                     .map(x -> x.getId()) //
                     .collect(Collectors.toList());
-            if (instanceIds.isEmpty() ) {
+            if (instanceIds.isEmpty()) {
                 getLog().info("no instances found");
                 return;
             }
@@ -77,7 +76,12 @@ public final class BeanstalkRemovePortsMojo extends AbstractAwsMojo {
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds)) //
                     .getReservations() //
                     .stream() //
-                    .flatMap(y -> y.getGroups().stream().map(z -> z.getGroupId())) //
+                    .flatMap(y -> y //
+                            .getInstances() //
+                            .stream() //
+                            .flatMap(z -> z.getNetworkInterfaces().stream()) //
+                            .flatMap(z -> z.getGroups().stream())
+                            .map(z -> z.getGroupId())) //
                     .collect(Collectors.toList());
             if (securityGroupIds.isEmpty()) {
                 getLog().info("no security groups found");
