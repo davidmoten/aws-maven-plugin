@@ -12,7 +12,7 @@
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <aws.sdk.version>1.12.271</aws.sdk.version>
+        <aws.sdk.version>1.12.272</aws.sdk.version>
         <scm.url>scm:git:https://github.com/davidmoten/aws-maven-plugin.git</scm.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
