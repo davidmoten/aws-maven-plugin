@@ -10,6 +10,8 @@ buildNumber.properties
 .project
 .classpath
 .settings
+.factorypath
+.java-version
 ### Idea IDE
 .idea
 *.iml
